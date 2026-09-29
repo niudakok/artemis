@@ -880,6 +880,23 @@ def get_google_llm(
     include_thoughts: bool | None = None,
     enable_grounding: bool = False,
 ) -> BaseChatModel:
+    # When the user set an OpenAI-compatible relay key but no Google key, route
+    # the "Google" helper through OpenAI instead of failing auth. This mirrors
+    # the upstream (yys9253462-gif/artemis) adaptation, but works with whatever
+    # model name the caller/relay actually serves rather than a hardcoded one.
+    if settings.OPENAI_API_KEY and not settings.GOOGLE_API_KEY:
+        ep = ModelEndpoint(
+            provider=ModelProvider.OPENAI,
+            model_name=model_name,
+            temperature=temperature or 0.0,
+            timeout_seconds=timeout or 60.0,
+            thinking_budget=thinking_budget,
+            thinking_level=thinking_level,
+            include_thoughts=include_thoughts,
+            enable_grounding=False,
+        )
+        return ModelFactory.create_model(ep)
+
     ep = ModelEndpoint(
         provider=ModelProvider.GOOGLE,
         model_name=model_name,
