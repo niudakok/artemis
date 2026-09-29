@@ -2061,8 +2061,8 @@
                 <!-- Top Row: App Icon + Name + Mode Badge -->
                 <div class="card-top-row">
                   <div class="app-icons-cluster">
-                    @for (app of item.apps; track app.name) {
-                      <div class="app-icon-badge" [title]="app.name">
+                    @for (app of item.apps; track app.nameKey) {
+                      <div class="app-icon-badge" [title]="app.nameKey | t">
                         <span class="material-symbols-outlined">{{ app.icon }}</span>
                       </div>
                     }
@@ -2077,13 +2077,13 @@
 
                 <!-- Middle Content: Title + Description -->
                 <div class="card-body">
-                  <h4 class="card-title">{{ item.title }}</h4>
-                  <p class="card-desc">{{ item.description }}</p>
+                  <h4 class="card-title">{{ item.titleKey | t }}</h4>
+                  <p class="card-desc">{{ item.descriptionKey | t }}</p>
                 </div>
 
                 <!-- Bottom Footer Row: Tag & Action -->
                 <div class="card-footer-row">
-                  <span class="tag-pill">{{ item.tag }}</span>
+                  <span class="tag-pill">{{ item.tagKey | t }}</span>
                   <div class="use-prompt-action">
                     <span>填入任务</span>
                     <span class="material-symbols-outlined action-arrow">arrow_forward</span>

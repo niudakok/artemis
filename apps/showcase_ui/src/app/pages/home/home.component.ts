@@ -20,6 +20,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AgentService } from '../../services/agent.service';
 import { SystemService } from '../../services/system.service';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { I18nService } from '../../core/i18n/i18n.service';
 import {
   AdbServerConnectionResult,
   AdbServerDevice,
@@ -114,6 +115,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public agentService = inject(AgentService);
   public systemService = inject(SystemService);
   public taskRecService = inject(TaskRecommendationService);
+  public i18n = inject(I18nService);
   private router = inject(Router);
 
   // High-level navigation mode: 'diagnostics' (System Setup Guide) vs 'launcher' (Task Execution)
@@ -1046,11 +1048,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public getAppNamesDisplay(apps: AppReference[]): string {
-    return apps.map(a => a.name).join(' + ');
+    return apps.map((a) => this.i18n.t(a.nameKey)).join(' + ');
   }
 
   public applySuggestion(item: SmartSuggestion): void {
-    this.taskGoal.set(item.goal);
+    this.taskGoal.set(this.i18n.t(item.goalKey));
     this.selectedProfile.set(item.profile);
     this.errorMessage.set(null);
   }
