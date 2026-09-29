@@ -212,6 +212,9 @@ export const EN_MESSAGES: Messages = {
 
   // ------------------------------------------------------- tool: headings ---
   'tool.title.fallback': 'Tool Call',
+  'tool.title.action': 'Action',
+  'tool.title.clearText': 'Clearing Text',
+  'tool.title.clickingSequence': 'Clicking Sequence',
   'tool.title.tap': 'Tapping Element',
   'tool.title.clickSequence': 'Executing Click Sequence',
   'tool.title.longPress': 'Long Pressing Element',
@@ -254,6 +257,25 @@ export const EN_MESSAGES: Messages = {
   'tool.error.cannotFix': 'Status: cannot_fix',
   'tool.error.actionFailed': 'Action Failed',
   'common.unknownError': 'Unknown error',
+
+  // ------------------------------------------------- session summary lines --
+  'session.summary.noLogs': 'No logs available.',
+  'session.summary.stoppedManually': 'Task stopped manually.',
+  'session.summary.verified': 'Execution completed and verified by checker.',
+  'session.summary.completed': 'Task completed successfully.',
+  'session.summary.inProgress': 'Execution session in progress or ended.',
+  'session.checker.noReason': 'No reason provided.',
+
+  // ------------------------------------------------ emulator / run statuses --
+  'emulator.stage.spawning': 'Spawning emulator process...',
+  'emulator.stage.launchFailed': 'Failed to initiate launch.',
+  'task.submitting': 'Submitting the task',
+  'task.defaultTitle': 'Task: {id}...',
+  'video.defaultTitle': 'Screen Recording',
+  'video.loading': 'Loading screen recording...',
+  'video.finalizing': 'Finalizing screen recording...',
+  'video.loadFailed': 'Unable to load the screen recording.',
+  'video.finalizeTimedOut': 'Recording finalization timed out. You can retry.',
 
   // --------------------------------------- task library & app names --
   'app.com.android.calculator2.name': 'Calculator',

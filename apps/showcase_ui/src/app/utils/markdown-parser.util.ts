@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { t } from '../core/i18n/runtime';
 import { MarkdownSegment, MarkdownLine, NoteMilestone, ParsedNote } from '../core/models/markdown.model';
 import { CheckerResult } from '../core/models/stream.model';
 
@@ -199,7 +200,7 @@ export function extractCheckerResult(text: string): CheckerResult | null {
     if (parsed && typeof parsed === 'object' && 'success' in parsed) {
       return {
         success: Boolean(parsed.success),
-        reason: parsed.reason || '未提供原因说明。'
+        reason: parsed.reason || t('session.checker.noReason')
       };
     }
   } catch {

@@ -193,6 +193,9 @@ export const ZH_CN_MESSAGES: Messages = {
 
   // ------------------------------------------------------- tool: headings ---
   'tool.title.fallback': '工具调用',
+  'tool.title.action': '动作',
+  'tool.title.clearText': '清空文本',
+  'tool.title.clickingSequence': '连续点击序列',
   'tool.title.tap': '点击元素',
   'tool.title.clickSequence': '执行连续点击序列',
   'tool.title.longPress': '长按元素',
@@ -235,6 +238,25 @@ export const ZH_CN_MESSAGES: Messages = {
   'tool.error.cannotFix': '状态: 无法修复',
   'tool.error.actionFailed': '动作执行失败',
   'common.unknownError': '未知错误',
+
+  // ------------------------------------------------- session summary lines --
+  'session.summary.noLogs': '暂无可用日志。',
+  'session.summary.stoppedManually': '任务已被手动停止。',
+  'session.summary.verified': '执行完成，并已通过校验器核验。',
+  'session.summary.completed': '任务已成功完成。',
+  'session.summary.inProgress': '执行会话进行中或已结束。',
+  'session.checker.noReason': '未提供原因说明。',
+
+  // ------------------------------------------------ emulator / run statuses --
+  'emulator.stage.spawning': '正在拉起模拟器进程...',
+  'emulator.stage.launchFailed': '启动初始化失败。',
+  'task.submitting': '正在提交任务',
+  'task.defaultTitle': '任务: {id}...',
+  'video.defaultTitle': '屏幕录制',
+  'video.loading': '正在加载屏幕录制视频...',
+  'video.finalizing': '正在完成屏幕录制收尾...',
+  'video.loadFailed': '无法加载屏幕录制视频。',
+  'video.finalizeTimedOut': '屏幕录制收尾超时，您可以重试。',
 
   // --------------------------------------- task library & app names --
   'app.com.android.calculator2.name': '计算器',

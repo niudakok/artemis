@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { t } from '../core/i18n/runtime';
 import { ActionParam, StepReplayFrame } from '../core/models/stream.model';
 import { extractNumbersFromCoordinateValue, isPureDirectionString, parseSequenceCoordinates, unwrapTraceAction } from './image-overlay.util';
 import { cleanErrorMessage, joinTargetDescriptions } from './tool-formatter.util';
@@ -165,60 +166,60 @@ export function getActionIcon(action: any): string {
  */
 export function getActionTitle(action: any): string {
   const act = getActionObject(action);
-  if (!act) return '动作';
+  if (!act) return t('tool.title.action');
   const name = (act.name || act.action || '').toLowerCase();
   switch (name) {
     case 'tap':
     case 'click':
     case 'tap_element':
     case 'click_element':
-      return '点击元素';
+      return t('tool.title.tap');
     case 'input':
     case 'input_text':
     case 'focus_and_input_text':
-      return '输入文本';
+      return t('tool.title.enterText');
     case 'focus_and_clear_text':
     case 'clear_text':
-      return '清空文本';
+      return t('tool.title.clearText');
     case 'swipe':
     case 'scroll': {
       const actObj = getActionObject(action);
       const args = actObj?.args && typeof actObj.args === 'object' ? actObj.args : {};
       const dir = actObj?.direction || actObj?.gesture || args.direction || args.gesture || (typeof args.action === 'string' ? args.action : '') || (typeof actObj?.action === 'string' && actObj.action !== name ? actObj.action : '');
       if (dir && isPureDirectionString(dir)) {
-        return `滑动屏幕（${String(dir).toUpperCase()}）`;
+        return t('tool.title.swipeDir', { dir: String(dir).toUpperCase() });
       }
-      return '滑动屏幕';
+      return t('tool.title.swipe');
     }
     case 'drag':
     case 'drag_and_drop':
-      return '拖拽屏幕';
+      return t('tool.title.drag');
     case 'press_key':
     case 'press_home':
     case 'press_back':
-      return '按下物理按键';
+      return t('tool.title.pressKey');
     case 'launch_app':
     case 'open_app':
-      return '启动应用';
+      return t('tool.title.launchApp');
     case 'stop_app':
     case 'close_app':
-      return '停止应用';
+      return t('tool.title.stopApp');
     case 'manage_app': {
       const actObj = getActionObject(action);
       const actStr = (actObj?.action || actObj?.args?.action || '').toLowerCase();
-      if (actStr === 'launch') return '启动应用';
-      if (actStr === 'stop' || actStr === 'close') return '停止应用';
-      return '管理应用';
+      if (actStr === 'launch') return t('tool.title.launchApp');
+      if (actStr === 'stop' || actStr === 'close') return t('tool.title.stopApp');
+      return t('tool.title.manageApp');
     }
     case 'wait_for_delay':
     case 'delay':
     case 'wait':
-      return '等待延时';
+      return t('tool.title.waitDelay');
     case 'long_press':
     case 'long_press_on':
-      return '长按元素';
+      return t('tool.title.longPress');
     case 'click_sequence':
-      return '连续点击序列';
+      return t('tool.title.clickingSequence');
     default:
       return name.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
   }
@@ -264,27 +265,27 @@ export function getActionTargetText(action: any): string {
  */
 export function getActionInputLabel(action: any): string {
   const act = getActionObject(action);
-  if (!act) return '输入';
+  if (!act) return t('tool.input.fallback');
   const name = (act.name || act.action || '').toLowerCase();
   if (name.includes('delay') || name.includes('wait')) {
-    return '时长';
+    return t('tool.input.duration');
   }
   if (name === 'swipe' || name === 'scroll' || name === 'drag' || name === 'drag_and_drop') {
     const actObj = getActionObject(action);
     const args = actObj?.args && typeof actObj.args === 'object' ? actObj.args : {};
     const dir = actObj?.direction || actObj?.gesture || args.direction || args.gesture || (typeof args.action === 'string' ? args.action : '') || (typeof actObj?.action === 'string' && actObj.action !== name ? actObj.action : '');
     if (dir && isPureDirectionString(dir)) {
-      return '方向';
+      return t('tool.input.direction');
     }
-    return '输入';
+    return t('tool.input.fallback');
   }
   if (name === 'press_key' || name.includes('key')) {
-    return '按键';
+    return t('tool.input.key');
   }
   if (name === 'input_text' || name.includes('input')) {
-    return '输入文本';
+    return t('tool.input.text');
   }
-  return '输入';
+  return t('tool.input.fallback');
 }
 
 /**
@@ -450,7 +451,7 @@ export function getActionErrorMessage(action: any, stepData?: any): string {
       }
     }
   }
-  return '动作执行失败';
+  return t('tool.error.actionFailed');
 }
 
 /**

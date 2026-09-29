@@ -16,6 +16,7 @@
 
 import { Injectable, signal, computed, inject, DestroyRef, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { t } from '../core/i18n/runtime';
 import { Observable, finalize, shareReplay, tap } from 'rxjs';
 import {
   AdbServerConnectionResponse,
@@ -324,7 +325,7 @@ export class SystemService {
       status: 'starting',
       pid: null,
       serial: null,
-      stage_message: '正在拉起模拟器进程...',
+      stage_message: t('emulator.stage.spawning'),
       progress_percent: 15,
       started_at: Date.now() / 1000,
       elapsed_seconds: 0,
@@ -352,7 +353,7 @@ export class SystemService {
             status: 'failed',
             pid: null,
             serial: null,
-            stage_message: '启动初始化失败。',
+            stage_message: t('emulator.stage.launchFailed'),
             progress_percent: 0,
             started_at: null,
             elapsed_seconds: 0,

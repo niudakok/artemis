@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { t } from '../core/i18n/runtime';
 import { StepBlock, PhaseBlock, StepEvent, StreamSegment, StreamResetNotice, DEFAULT_STREAM_RESET_MESSAGE, PersistedCheckerStream } from '../core/models/stream.model';
 import { isAndroidAction, isReportStatusAction, getReportStatusExplanation, getReportStatusValue, getActionObject } from './action-formatter.util';
 import { getUniqueGenericTools, isInternalPlumbingTool } from './tool-formatter.util';
@@ -940,20 +941,20 @@ export function getSortedStepEvents(
  * Compile human-readable session summary from logs
  */
 export function compileSessionSummary(logs: any[]): string {
-  if (!logs || logs.length === 0) return '暂无可用日志。';
+  if (!logs || logs.length === 0) return t('session.summary.noLogs');
 
   // Check for goal completed / checker response / cancellation / report_task_status
   for (let i = logs.length - 1; i >= 0; i--) {
     const log = logs[i];
     if (log.type === 'session_ended') {
       if (log.data?.status === 'cancelled' || log.data?.was_stopped_manually) {
-        return '任务已被手动停止。';
+        return t('session.summary.stoppedManually');
       }
     }
     if (log.type === 'llm_stream' && log.data?.text) {
       const text = log.data.text;
       if (text.includes('```json') && text.includes('"success"')) {
-        return '执行完成，并已通过校验器核验。';
+        return t('session.summary.verified');
       }
     }
     if (log.type === 'step_recorded' || log.type === 'step_updated') {
@@ -963,12 +964,12 @@ export function compileSessionSummary(logs: any[]): string {
         if (exp) return exp;
       }
       if (log.data?.status === 'completed') {
-        return log.data.message || '任务已成功完成。';
+        return log.data.message || t('session.summary.completed');
       }
     }
   }
 
-  return '执行会话进行中或已结束。';
+  return t('session.summary.inProgress');
 }
 
 /**
