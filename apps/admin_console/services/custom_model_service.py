@@ -16,15 +16,17 @@
 
 Users can point ARTEMIS at any OpenAI-compatible endpoint (a relay, a
 self-hosted server, or local Ollama/vLLM) straight from the Web console. This
-module is the backend half: it writes the pieces the runtime router already
-reads so a fresh task actually routes there —
+module is the backend half: it writes the pieces the runtime router reads so a
+fresh task actually routes there —
 
   * ``OPENAI_API_KEY``   -> .env (and process env)
   * ``OPENAI_BASE_URL``  -> .env
-  * ``config/artemis.jsonc`` "default" block -> provider=openai, model=<name>
+  * ``config/artemis.jsonc`` every ``provider``/``model`` -> openai + <model>
 
-The JSONC edit is targeted (it only rewrites the keys inside the "default"
-object) so comments elsewhere in the file are preserved.
+The config rewrite covers *all* nodes (planner, hopper, object_detector,
+explorer, ...) and their fallbacks so no Gemini model name or Google fallback
+is left behind — that was what caused ``ChatGoogleGenerativeAI`` (no key) at
+runtime after switching only the default.
 """
 
 import logging
@@ -33,7 +35,6 @@ from pathlib import Path
 
 from artemis.config import constants
 from artemis.config.paths import get_config_path, get_env_file
-from third_party.mobile_use.utils.file import load_jsonc
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,29 @@ logger = logging.getLogger(__name__)
 _DEFAULT_OPEN = re.compile(r'"default"\s*:\s*\{')
 _PROVIDER_LINE = re.compile(r'^\s*"provider"\s*:\s*"[^"]*"(,)?\s*$')
 _MODEL_LINE = re.compile(r'^\s*"model"\s*:\s*"[^"]*"(,)?\s*$')
+
+
+def set_all_models(config_path: Path, model: str) -> bool:
+    """Rewrite *every* ``provider``/``model`` key in the config to openai+model.
+
+    ARTEMIS has per-node models (hopper, object_detector, explorer, ...) whose
+    model names are Gemini-specific and whose fallbacks route to Google. Leaving
+    those in place after switching the default is what caused
+    ``ChatGoogleGenerativeAI`` (no key) at runtime. This covers them all so no
+    Gemini model name or Google fallback survives.
+
+    Only real config key lines are touched (``"provider": ...`` / ``"model": ...
+    ``); commented mentions in prose are unaffected. Returns True.
+    """
+    raw = config_path.read_text(encoding="utf-8")
+    lines = raw.split("\n")
+    out: list[str] = []
+    for line in lines:
+        line = re.sub(r'("provider"\s*:\s*")[^"]*(")', r"\g<1>openai\g<2>", line)
+        line = re.sub(r'("model"\s*:\s*")[^"]*(")', rf"\g<1>{model}\g<2>", line)
+        out.append(line)
+    config_path.write_text("\n".join(out), encoding="utf-8")
+    return True
 
 
 def update_default_model(config_path: Path, provider: str, model: str) -> bool:
@@ -165,18 +189,23 @@ def apply_custom_model(base_url: str, model: str, api_key: str, persist: bool = 
             "base_url": base_url.strip(),
             "model": model.strip(),
         }
-    # Back up the tracked config before rewriting its default block so the
-    # change is reversible.
+    # Back up the tracked config before rewriting it so the change is reversible.
     backup = cfg.with_name(cfg.name + ".bak")
     try:
         backup.write_text(cfg.read_text(encoding="utf-8"), encoding="utf-8")
     except Exception as exc:  # noqa: BLE001 - backup is best-effort
         logger.warning("Could not back up %s: %s", cfg, exc)
-    update_default_model(cfg, "openai", model.strip())
+    set_all_models(cfg, model.strip())
 
     return {
         "applied": True,
         "base_url": base_url.strip(),
         "model": model.strip(),
         "provider": "openai",
+        "note": (
+            "Every node (planner, hopper, object_detector, explorer, etc.) and its "
+            "fallback now uses the custom OpenAI-compatible model. NOTE: ARTEMIS's "
+            "coordinate/visual grounding is designed around a Gemini ER model; a "
+            "non-Gemini model may locate on-screen elements less precisely."
+        ),
     }
