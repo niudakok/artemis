@@ -20,6 +20,13 @@ export type Locale = 'zh-CN' | 'en';
 /** Canonical locale used as the key of every translation table. */
 export const DEFAULT_LOCALE: Locale = 'en';
 
+/**
+ * Locale shown when the user has no stored preference. Keeping this separate
+ * from `DEFAULT_LOCALE` lets the en table stay the reference/fallback for
+ * missing keys while the *initial UI* reads in Chinese.
+ */
+export const DEFAULT_UI_LOCALE: Locale = 'zh-CN';
+
 export const SUPPORTED_LOCALES: readonly Locale[] = ['zh-CN', 'en'];
 
 /** Human-readable names, each rendered in its own language. */
@@ -30,21 +37,6 @@ export const LOCALE_LABELS: Record<Locale, string> = {
 
 export function isSupportedLocale(value: unknown): value is Locale {
   return typeof value === 'string' && (SUPPORTED_LOCALES as readonly string[]).includes(value);
-}
-
-/**
- * Pick the initial locale from the browser, falling back to the default.
- * `zh` covers zh-CN, zh-TW and zh-HK without enumerating them.
- */
-export function detectInitialLocale(navigatorLanguage?: string): Locale {
-  const raw = navigatorLanguage ?? (typeof navigator === 'undefined' ? '' : navigator.language);
-  const tag = String(raw || '').toLowerCase();
-  if (!tag) return DEFAULT_LOCALE;
-  if (isSupportedLocale(tag)) return tag;
-  const primary = tag.split('-')[0];
-  if (primary === 'zh') return 'zh-CN';
-  if (primary === 'en') return 'en';
-  return DEFAULT_LOCALE;
 }
 
 const STORAGE_KEY = 'artemis.locale';

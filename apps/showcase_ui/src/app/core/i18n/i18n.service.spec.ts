@@ -18,7 +18,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { I18nService } from './i18n.service';
 import { setRuntimeTranslator, t } from './runtime';
-import { LOCALE_LABELS, SUPPORTED_LOCALES, detectInitialLocale, isSupportedLocale } from './locale';
+import { LOCALE_LABELS, SUPPORTED_LOCALES, DEFAULT_UI_LOCALE, isSupportedLocale } from './locale';
 
 describe('I18nService', () => {
   let service: I18nService;
@@ -86,12 +86,15 @@ describe('I18nService', () => {
 });
 
 describe('locale helpers', () => {
-  it('maps browser tags onto a supported locale', () => {
-    expect(detectInitialLocale('zh-CN')).toBe('zh-CN');
-    expect(detectInitialLocale('zh-TW')).toBe('zh-CN');
-    expect(detectInitialLocale('en-GB')).toBe('en');
-    expect(detectInitialLocale('de-DE')).toBe('en');
-    expect(detectInitialLocale('')).toBe('en');
+  it('defaults the initial UI to Chinese but keeps English available', () => {
+    expect(DEFAULT_UI_LOCALE).toBe('zh-CN');
+    // A fresh service reads no stored preference, so it falls back to Chinese.
+    localStorage.clear();
+    const fresh = TestBed.inject(I18nService);
+    expect(fresh.locale()).toBe('zh-CN');
+    // Switching remains available.
+    fresh.setLocale('en');
+    expect(fresh.locale()).toBe('en');
   });
 
   it('labels every supported locale in its own language', () => {

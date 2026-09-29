@@ -24,7 +24,7 @@ import {
   DEFAULT_LOCALE,
   Locale,
   SUPPORTED_LOCALES,
-  detectInitialLocale,
+  DEFAULT_UI_LOCALE,
   persistLocale,
   readStoredLocale,
 } from './locale';
@@ -60,7 +60,7 @@ function interpolate(template: string, params?: TranslateParams): string {
  */
 @Injectable({ providedIn: 'root' })
 export class I18nService {
-  private readonly current = signal<Locale>(readStoredLocale() ?? detectInitialLocale());
+  private readonly current = signal<Locale>(readStoredLocale() ?? DEFAULT_UI_LOCALE);
 
   /** Reactive locale, readable from templates and pipes. */
   readonly locale = this.current.asReadonly();
