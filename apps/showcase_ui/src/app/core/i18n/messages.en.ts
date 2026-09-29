@@ -905,4 +905,12 @@ export const EN_MESSAGES: Messages = {
   'ui.path.about': 'Settings > About Phone',
   'ui.path.developer': 'Settings > Developer Options',
   'ui.path.wireless': 'Settings > Developer Options > Wireless debugging',
+
+  // ------------------------------------------------------------- nav bar --
+  'nav.aria': 'Main Navigation',
+  'nav.home.title': 'Return to Home Launcher to start a new task',
+  'nav.home.label': 'New / Home',
+  'nav.workspace.title': 'Open Workspace',
+  'nav.workspace.label': 'Workspace',
+  'nav.locale.title': 'Switch display language',
 };

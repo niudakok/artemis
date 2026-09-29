@@ -1,5 +1,6 @@
 import { drawActionCoordinatesOnOverlay, unwrapTraceAction } from './image-overlay.util';
 import { getActionCoords, getActionTargetText } from './action-formatter.util';
+import { setRuntimeTranslator } from '../core/i18n/runtime';
 
 // Trace records as the DataEngine publishes them in `generic_tools`.
 const PRO_TAP_TRACE = {
@@ -38,6 +39,8 @@ function fakeImage(): HTMLImageElement {
 }
 
 describe('unwrapTraceAction', () => {
+  beforeEach(() => setRuntimeTranslator(null));
+
   it('flattens a Pro action trace (payload.action)', () => {
     const act = unwrapTraceAction(PRO_TAP_TRACE);
     expect(act.action).toBe('tap');

@@ -14,38 +14,67 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
+import { I18nService } from '../../core/i18n/i18n.service';
+import { LOCALE_LABELS, Locale, SUPPORTED_LOCALES } from '../../core/i18n/locale';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-nav-switcher',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, TranslatePipe],
   template: `
-    <nav class="floating-nav-switcher" aria-label="Main Navigation">
-      <a 
-        routerLink="/" 
-        routerLinkActive="active" 
+    <nav class="floating-nav-switcher" [attr.aria-label]="'nav.aria' | t">
+      <a
+        routerLink="/"
+        routerLinkActive="active"
         [routerLinkActiveOptions]="{exact: true}"
         class="nav-tab-btn"
-        title="Return to Home Launcher to start a new task"
+        [title]="'nav.home.title' | t"
       >
         <span class="material-symbols-outlined tab-icon">add_task</span>
-        <span class="tab-label">New / Home</span>
+        <span class="tab-label">{{ 'nav.home.label' | t }}</span>
       </a>
-      <a 
-        routerLink="/workspace" 
-        routerLinkActive="active" 
+      <a
+        routerLink="/workspace"
+        routerLinkActive="active"
         class="nav-tab-btn"
-        title="Open Workspace"
+        [title]="'nav.workspace.title' | t"
       >
         <span class="material-symbols-outlined tab-icon">space_dashboard</span>
-        <span class="tab-label">Workspace</span>
+        <span class="tab-label">{{ 'nav.workspace.label' | t }}</span>
       </a>
+      <button
+        type="button"
+        class="nav-tab-btn nav-locale-btn"
+        [title]="'nav.locale.title' | t"
+        [attr.aria-label]="'nav.locale.title' | t"
+        (click)="toggleLocale()"
+      >
+        <span class="material-symbols-outlined tab-icon">translate</span>
+        <span class="tab-label">{{ currentLocaleLabel() }}</span>
+      </button>
     </nav>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./nav-switcher.component.scss']
 })
-export class NavSwitcherComponent {}
+export class NavSwitcherComponent {
+  private readonly i18n = inject(I18nService);
+
+  /** Label of the locale a click would switch *to*, so the affordance reads as an action. */
+  currentLocaleLabel(): string {
+    const current = this.i18n.locale();
+    const next = SUPPORTED_LOCALES.find((l) => l !== current) ?? current;
+    return LOCALE_LABELS[next as Locale];
+  }
+
+  toggleLocale(): void {
+    const current = this.i18n.locale();
+    const next = SUPPORTED_LOCALES.find((l) => l !== current);
+    if (next) this.i18n.setLocale(next);
+  }
+}

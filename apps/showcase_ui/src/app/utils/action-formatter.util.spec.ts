@@ -7,8 +7,11 @@ import {
   getActionErrorMessage,
   extractActionExtraParams
 } from './action-formatter.util';
+import { setRuntimeTranslator } from '../core/i18n/runtime';
 
 describe('action-formatter.util screenshot chaining', () => {
+  beforeEach(() => setRuntimeTranslator(null));
+
   it('should chain pre/post images correctly in FailureAnalyzer multi-step recovery', () => {
     const stepData = {
       step_id: 'step-06',

@@ -879,4 +879,12 @@ export const ZH_CN_MESSAGES: Messages = {
   'ui.path.about': 'Settings > About Phone',
   'ui.path.developer': 'Settings > Developer Options',
   'ui.path.wireless': 'Settings > Developer Options > Wireless debugging',
+
+  // ------------------------------------------------------------- nav bar --
+  'nav.aria': '主导航',
+  'nav.home.title': '返回首页启动器以开始新任务',
+  'nav.home.label': '新建 / 首页',
+  'nav.workspace.title': '打开工作区',
+  'nav.workspace.label': '工作区',
+  'nav.locale.title': '切换界面语言',
 };
