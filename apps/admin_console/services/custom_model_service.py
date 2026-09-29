@@ -45,6 +45,16 @@ _PROVIDER_LINE = re.compile(r'^\s*"provider"\s*:\s*"[^"]*"(,)?\s*$')
 _MODEL_LINE = re.compile(r'^\s*"model"\s*:\s*"[^"]*"(,)?\s*$')
 
 
+def _rewrite_models(raw: str, model: str) -> str:
+    """Return ``raw`` with every ``provider``/``model`` key rewritten to openai+model."""
+    out: list[str] = []
+    for line in raw.split("\n"):
+        line = re.sub(r'("provider"\s*:\s*")[^"]*(")', r"\g<1>openai\g<2>", line)
+        line = re.sub(r'("model"\s*:\s*")[^"]*(")', rf"\g<1>{model}\g<2>", line)
+        out.append(line)
+    return "\n".join(out)
+
+
 def set_all_models(config_path: Path, model: str) -> bool:
     """Rewrite *every* ``provider``/``model`` key in the config to openai+model.
 
@@ -57,14 +67,7 @@ def set_all_models(config_path: Path, model: str) -> bool:
     Only real config key lines are touched (``"provider": ...`` / ``"model": ...
     ``); commented mentions in prose are unaffected. Returns True.
     """
-    raw = config_path.read_text(encoding="utf-8")
-    lines = raw.split("\n")
-    out: list[str] = []
-    for line in lines:
-        line = re.sub(r'("provider"\s*:\s*")[^"]*(")', r"\g<1>openai\g<2>", line)
-        line = re.sub(r'("model"\s*:\s*")[^"]*(")', rf"\g<1>{model}\g<2>", line)
-        out.append(line)
-    config_path.write_text("\n".join(out), encoding="utf-8")
+    config_path.write_text(_rewrite_models(config_path.read_text(encoding="utf-8"), model), encoding="utf-8")
     return True
 
 
@@ -180,7 +183,9 @@ def apply_custom_model(base_url: str, model: str, api_key: str, persist: bool = 
 
     os.environ[constants.ENV_OPENAI_BASE_URL] = base_url.strip()
 
-    # 3. Default provider/model -> config/artemis.jsonc.
+    # 3. Write a *local* config override (gitignored) with every node set to
+    #    openai + the custom model, and point ARTEMIS at it via
+    #    ARTEMIS_ARTEMIS_JSONC. The tracked config/artemis.jsonc stays clean.
     cfg = get_config_path(constants.ARTEMIS_CONFIG_FILENAME)
     if not cfg.exists():
         return {
@@ -189,23 +194,33 @@ def apply_custom_model(base_url: str, model: str, api_key: str, persist: bool = 
             "base_url": base_url.strip(),
             "model": model.strip(),
         }
-    # Back up the tracked config before rewriting it so the change is reversible.
-    backup = cfg.with_name(cfg.name + ".bak")
-    try:
-        backup.write_text(cfg.read_text(encoding="utf-8"), encoding="utf-8")
-    except Exception as exc:  # noqa: BLE001 - backup is best-effort
-        logger.warning("Could not back up %s: %s", cfg, exc)
-    set_all_models(cfg, model.strip())
+    local_cfg = cfg.with_name("artemis.local.jsonc")
+    # Base the override on the *tracked* config so it stays a full, valid file.
+    tracked_raw = cfg.read_text(encoding="utf-8")
+    local_raw = _rewrite_models(tracked_raw, model.strip())
+    local_cfg.write_text(local_raw, encoding="utf-8")
 
+    env_var = f"ARTEMIS_{constants.ARTEMIS_CONFIG_FILENAME.upper().replace('.', '_')}"
+    if persist:
+        _upsert_env(env_path, env_var, str(local_cfg))
+    import os
+
+    os.environ[env_var] = str(local_cfg)
+
+    # Note: a running server caches its LLM config; applying on a fresh task
+    # reads the env var, but a restart guarantees the override is active.
     return {
         "applied": True,
         "base_url": base_url.strip(),
         "model": model.strip(),
         "provider": "openai",
+        "local_config": str(local_cfg),
         "note": (
-            "Every node (planner, hopper, object_detector, explorer, etc.) and its "
-            "fallback now uses the custom OpenAI-compatible model. NOTE: ARTEMIS's "
-            "coordinate/visual grounding is designed around a Gemini ER model; a "
-            "non-Gemini model may locate on-screen elements less precisely."
+            "Custom model saved to a local override (config/artemis.local.jsonc). "
+            "ARTEMIS_ARTEMIS_JSONC now points at it, so config/artemis.jsonc is "
+            "not modified. NOTE: ARTEMIS's coordinate/visual grounding is designed "
+            "around a Gemini ER model; a non-Gemini model may locate on-screen "
+            "elements less precisely. Restart the service to guarantee the override "
+            "is active."
         ),
     }

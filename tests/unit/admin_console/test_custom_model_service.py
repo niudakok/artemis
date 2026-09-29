@@ -89,12 +89,12 @@ def test_upsert_env_appends_when_absent(tmp_path: Path):
     assert "EXISTING=1" in text
 
 
-def test_apply_custom_model_writes_router_state(tmp_path: Path, monkeypatch):
-    """Prove the persisted config is exactly what the runtime router reads.
+def test_apply_custom_model_writes_local_override(tmp_path: Path, monkeypatch):
+    """Prove the custom model lands in a gitignored *local* override, not the
+    tracked config, and that ARTEMIS_ARTEMIS_JSONC points at it.
 
-    Full pipeline, temp-scoped so no real .env / config are touched: apply the
-    custom model, then confirm config/artemis.jsonc now carries
-    default provider=openai + the chosen model, and .env carries OPENAI_BASE_URL.
+    ``settings.set_api_key`` is patched to a no-op so the test never touches the
+    real ``.env`` / credentials.
     """
     from third_party.mobile_use.utils.file import load_jsonc
 
@@ -107,25 +107,40 @@ def test_apply_custom_model_writes_router_state(tmp_path: Path, monkeypatch):
     env.write_text("EXISTING=1\n# OPENAI_BASE_URL=http://old\n", encoding="utf-8")
 
     import apps.admin_console.services.custom_model_service as svc
+    from artemis.config.settings import Settings
+    from unittest.mock import patch
 
-    monkeypatch.setattr(svc, "get_config_path", lambda name, *a, **k: cfg)
-    monkeypatch.setattr(svc, "get_env_file", lambda: env)
+    # NEVER write real credentials from a unit test: intercept the class method
+    # so apply_custom_model's settings.set_api_key(...) is a no-op.
+    with patch.object(Settings, "set_api_key", lambda self, *a, **k: None):
+        monkeypatch.setattr(svc, "get_config_path", lambda name, *a, **k: cfg)
+        monkeypatch.setattr(svc, "get_env_file", lambda: env)
 
-    result = apply_custom_model(
-        base_url="http://127.0.0.1:11434/v1", model="llama3.2-vision", api_key="", persist=True
-    )
+        result = apply_custom_model(
+            base_url="http://127.0.0.1:11434/v1",
+            model="llama3.2-vision",
+            api_key="",
+            persist=True,
+        )
     assert result["applied"] is True
     assert result["provider"] == "openai"
-    assert result["model"] == "llama3.2-vision"
 
-    # The default block that the router consumes.
+    # The tracked config is untouched (still google default).
     with open(cfg, encoding="utf-8") as f:
-        data = load_jsonc(f)
-    assert data["default"]["provider"] == "openai"
-    assert data["default"]["model"] == "llama3.2-vision"
+        tracked = load_jsonc(f)
+    assert tracked["default"]["provider"] == "google"
 
-    # OPENAI_BASE_URL persisted; commented duplicate cleared; env key also set.
+    # The *local* override carries provider=openai + the model everywhere.
+    local = cfg.with_name("artemis.local.jsonc")
+    assert local.exists()
+    with open(local, encoding="utf-8") as f:
+        local_cfg = load_jsonc(f)
+    assert local_cfg["default"]["provider"] == "openai"
+    assert local_cfg["default"]["model"] == "llama3.2-vision"
+
+    # ARTEMIS_ARTEMIS_JSONC set in .env + process; OPENAI_BASE_URL persisted.
     env_text = env.read_text(encoding="utf-8")
+    assert f"ARTEMIS_ARTEMIS_JSONC={local}" in env_text
     assert "OPENAI_BASE_URL=http://127.0.0.1:11434/v1" in env_text
     assert "# OPENAI_BASE_URL" not in env_text
     assert "EXISTING=1" in env_text

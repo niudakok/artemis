@@ -116,6 +116,11 @@ tools/
 # Runtime-generated IPC port lock file
 artemis/artemis-ipc-port
 
+# Local-override runtime config (custom model saved from the Web console).
+# ARTEMIS reads it via ARTEMIS_ARTEMIS_JSONC so the tracked
+# config/artemis.jsonc is never dirtied by a per-machine model choice.
+config/artemis.local.jsonc
+
 # OS Artifacts
 .DS_Store
 .DS_Store?
