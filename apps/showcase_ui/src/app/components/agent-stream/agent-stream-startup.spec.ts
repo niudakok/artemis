@@ -2,9 +2,11 @@ import { StartupProgressEvent } from '../../services/agent.service';
 import { buildStartupWorkItems } from './agent-stream.component';
 import { setRuntimeTranslator } from '../../core/i18n/runtime';
 
-describe('startup Work block', () => {
-  beforeEach(() => setRuntimeTranslator(null));
+// The module-global runtime translator must not leak between specs: these
+// assertions target the reference locale.
+beforeEach(() => setRuntimeTranslator(null));
 
+describe('startup Work block', () => {
   it('shows only the three device preparation operations', () => {
     const events: StartupProgressEvent[] = [
       { stage: 'submitting', message: 'Submitting the task', timestamp: 100 },

@@ -15,9 +15,11 @@ import {
 } from './tool-formatter.util';
 import { setRuntimeTranslator } from '../core/i18n/runtime';
 
-describe('compress_history timeline line', () => {
-  beforeEach(() => setRuntimeTranslator(null));
+// The module-global runtime translator must not leak between specs: these
+// assertions target the reference locale.
+beforeEach(() => setRuntimeTranslator(null));
 
+describe('compress_history timeline line', () => {
   const trace = (status: string, args: Record<string, any>) => ({
     type: 'tool',
     name: 'compress_history',

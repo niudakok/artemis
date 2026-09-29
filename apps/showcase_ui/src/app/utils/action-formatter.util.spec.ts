@@ -9,9 +9,11 @@ import {
 } from './action-formatter.util';
 import { setRuntimeTranslator } from '../core/i18n/runtime';
 
-describe('action-formatter.util screenshot chaining', () => {
-  beforeEach(() => setRuntimeTranslator(null));
+// The module-global runtime translator must not leak between specs: these
+// assertions target the reference locale.
+beforeEach(() => setRuntimeTranslator(null));
 
+describe('action-formatter.util screenshot chaining', () => {
   it('should chain pre/post images correctly in FailureAnalyzer multi-step recovery', () => {
     const stepData = {
       step_id: 'step-06',

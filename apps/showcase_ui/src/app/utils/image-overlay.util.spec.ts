@@ -38,9 +38,11 @@ function fakeImage(): HTMLImageElement {
   return { naturalWidth: 1080, naturalHeight: 2424 } as unknown as HTMLImageElement;
 }
 
-describe('unwrapTraceAction', () => {
-  beforeEach(() => setRuntimeTranslator(null));
+// The module-global runtime translator must not leak between specs: these
+// assertions target the reference locale.
+beforeEach(() => setRuntimeTranslator(null));
 
+describe('unwrapTraceAction', () => {
   it('flattens a Pro action trace (payload.action)', () => {
     const act = unwrapTraceAction(PRO_TAP_TRACE);
     expect(act.action).toBe('tap');
