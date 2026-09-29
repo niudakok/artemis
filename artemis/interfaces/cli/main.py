@@ -47,19 +47,13 @@ app = typer.Typer(
 )
 
 # Register subcommands
-app.command(name="ui", help="在浏览器中启动 Artemis 交互控制台与 Web 调试面板。")(
-    ui_command
-)
+app.command(name="ui", help="在浏览器中启动 Artemis 交互控制台与 Web 调试面板。")(ui_command)
 app.command(name="restart", help="重启正在运行的 Artemis Web 服务。")(restart_command)
 app.command(name="stop", help="停止运行中的 Artemis Web 服务。")(stop_command)
 app.command(name="status", help="查看 Artemis Web 服务当前运行状态。")(status_command)
 app.command(name="run", help="在目标移动设备上执行自主自动化任务。")(run_command)
-app.command(name="init", help="交互式初始化向导：配置大模型 API 密钥与设备连接。")(
-    init_command
-)
-app.command(name="doctor", help="系统体检：检查运行环境依赖、ADB 连接与配置状态。")(
-    doctor_command
-)
+app.command(name="init", help="交互式初始化向导：配置大模型 API 密钥与设备连接。")(init_command)
+app.command(name="doctor", help="系统体检：检查运行环境依赖、ADB 连接与配置状态。")(doctor_command)
 app.command(name="batch", help="批量执行多个自动化任务工作流。")(batch_command)
 app.command(name="mcp", help="启动 Artemis 原生 Model Context Protocol (MCP) 服务。")(mcp_command)
 app.add_typer(server_app, name="server", help="服务端代理与云控 Web 仪表盘服务。")
