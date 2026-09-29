@@ -15,6 +15,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, NgZone, signal, computed, effect, inject, untracked, DestroyRef, AfterViewInit } from '@angular/core';
+import { t } from '../../core/i18n/runtime';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -33,24 +35,35 @@ import {
   tuningLabel
 } from '../../utils/run-info.util';
 
-export const PLANNING_LOADER_PHRASES: string[] = [
-  '正在规划下一步...',
-  '正在分析屏幕坐标...',
-  '正在推理屏幕语义...',
-  '正在制定操作策略...',
-  '正在解析界面元素与状态...',
-  '正在综合决策路径...',
-  '正在校准下一步动作...',
-  '正在对齐逻辑目标...',
-  '正在评估最优子目标...',
-  '正在采集界面感知输入...',
-  '正在计算下一步交互...',
-  '正在优化执行策略...',
-  '正在推演可能结果...',
-  '正在唤起模型直觉...',
-  '正在酝酿下一条指令...',
-  '正在推演战术动作...'
+const PLANNING_LOADER_KEYS: readonly string[] = [
+  'startup.thinking.planning',
+  'startup.thinking.coordinates',
+  'startup.thinking.semantics',
+  'startup.thinking.tactics',
+  'startup.thinking.elements',
+  'startup.thinking.decision',
+  'startup.thinking.calibrating',
+  'startup.thinking.aligning',
+  'startup.thinking.subgoals',
+  'startup.thinking.sensing',
+  'startup.thinking.interaction',
+  'startup.thinking.strategy',
+  'startup.thinking.outcomes',
+  'startup.thinking.intuition',
+  'startup.thinking.command',
+  'startup.thinking.moves'
 ];
+
+/**
+ * Resolve the rotating "thinking" phrases at call time.
+ *
+ * A module-level array of translated strings would be evaluated at import,
+ * before `I18nService` registers its translator, freezing every phrase in the
+ * reference locale and making a language switch invisible here.
+ */
+export function planningLoaderPhrases(): string[] {
+  return PLANNING_LOADER_KEYS.map((key) => t(key));
+}
 
 export interface StartupWorkItem extends StartupProgressEvent {
   isActive: boolean;
@@ -60,7 +73,8 @@ export interface StartupWorkItem extends StartupProgressEvent {
 interface StartupWorkStage {
   started: string;
   completed: string;
-  completedMessage: string;
+  /** Message key for the completion line, resolved at render time. */
+  completedMessageKey: string;
   /** Sub-steps that replace the live message while the stage is still running. */
   liveDetailStages?: string[];
   /** A later event whose message is a better completion line than the stage's own. */
@@ -71,12 +85,12 @@ const STARTUP_WORK_STAGES: StartupWorkStage[] = [
   {
     started: 'device_check',
     completed: 'device_ready',
-    completedMessage: 'Android 设备已连接'
+    completedMessageKey: 'startup.stage.deviceConnected'
   },
   {
     started: 'uiautomator',
     completed: 'uiautomator_ready',
-    completedMessage: '界面层级感知服务已就绪',
+    completedMessageKey: 'startup.stage.hierarchyReady',
     // First task on a device installs / upgrades the accessibility helper
     // (a few seconds): say so instead of a generic "connecting".
     liveDetailStages: ['helper_install', 'helper_upgrade'],
@@ -86,7 +100,7 @@ const STARTUP_WORK_STAGES: StartupWorkStage[] = [
   {
     started: 'environment',
     completed: 'environment_ready',
-    completedMessage: '设备运行环境已就绪'
+    completedMessageKey: 'startup.stage.environmentReady'
   }
 ];
 
@@ -137,7 +151,7 @@ export function buildStartupWorkItems(
       ? byStage.get(stage.completedDetailStage)
       : undefined;
     const message = completed
-      ? (completedDetail?.message || explicitlyCompleted?.message || stage.completedMessage)
+      ? (completedDetail?.message || explicitlyCompleted?.message || t(stage.completedMessageKey))
       : (liveDetail?.message || started!.message);
 
     return [{
@@ -233,7 +247,7 @@ export type { MarkdownSegment, MarkdownLine, NoteMilestone, ParsedNote, StreamRe
 @Component({
   selector: 'app-agent-stream',
   standalone: true,
-  imports: [CommonModule, FormsModule, OverlayModule],
+  imports: [CommonModule, FormsModule, OverlayModule, TranslatePipe],
   templateUrl: './agent-stream.component.html',
   styleUrl: './agent-stream.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -259,7 +273,7 @@ export class AgentStreamComponent implements AfterViewInit {
   };
 
   // Dynamic Planning Loader Game-style Phrases
-  public currentPlanningText = signal<string>(PLANNING_LOADER_PHRASES[0]);
+  public currentPlanningText = signal<string>(t('startup.thinking.planning'));
   private planningIntervalId: any = null;
   private currentPhraseIndex = 0;
 
@@ -725,14 +739,17 @@ export class AgentStreamComponent implements AfterViewInit {
     // Periodically rotate loading text like game loading screen hints
     effect(() => {
       const isLoading = this.showPlanningLoader();
+      // Re-read on locale change so the rotation follows the active language.
+      const phrases = planningLoaderPhrases();
       if (isLoading) {
         if (!this.planningIntervalId) {
-          this.currentPhraseIndex = Math.floor(Math.random() * PLANNING_LOADER_PHRASES.length);
-          this.currentPlanningText.set(PLANNING_LOADER_PHRASES[this.currentPhraseIndex]);
+          this.currentPhraseIndex = Math.floor(Math.random() * phrases.length);
+          this.currentPlanningText.set(phrases[this.currentPhraseIndex]);
 
           this.planningIntervalId = setInterval(() => {
-            this.currentPhraseIndex = (this.currentPhraseIndex + 1) % PLANNING_LOADER_PHRASES.length;
-            this.currentPlanningText.set(PLANNING_LOADER_PHRASES[this.currentPhraseIndex]);
+            const live = planningLoaderPhrases();
+            this.currentPhraseIndex = (this.currentPhraseIndex + 1) % live.length;
+            this.currentPlanningText.set(live[this.currentPhraseIndex]);
           }, 2800);
         }
       } else {
@@ -1511,17 +1528,28 @@ export class AgentStreamComponent implements AfterViewInit {
     return isVideoTool(tool);
   }
 
+  /**
+   * Queue header text.
+   *
+   * Built in code rather than inline because Angular parses `{` inside a
+   * `{{ }}` interpolation as an ICU block, so an object literal of parameters
+   * cannot be written directly in the template.
+   */
+  public activeQueueLabel(): string {
+    return t('stream.queue.active', { count: this.activeQueue().length });
+  }
+
   public getVideoToolTarget(tool: any): string | null {
     return getVideoToolTarget(tool);
   }
 
   public getVideoAnalysisLabel(tool: any): string {
-    return getVideoAnalysisView(tool)?.title || '正在分析屏幕录制视频';
+    return getVideoAnalysisView(tool)?.title || t('tool.video.status.running');
   }
 
   public getVideoAnalysisRangeLabel(tool: any): string {
     const range = getVideoAnalysisView(tool)?.requestedRange;
-    if (!range) return '屏幕录制';
+    if (!range) return t('video.title.short');
     return `${formatVideoTime(range.start)}–${formatVideoTime(range.end)}`;
   }
 
@@ -1530,11 +1558,11 @@ export class AgentStreamComponent implements AfterViewInit {
     if (!view || view.totalCount <= 1) return '';
     if (view.outcome === 'running' || view.outcome === 'recovering') {
       return view.completedCount > 0
-        ? `已保存 ${view.completedCount}/${view.totalCount} 个视频片段`
+        ? t('video.segmentsSaved', { done: view.completedCount, total: view.totalCount })
         : '';
     }
     if (view.outcome === 'partial') {
-      return `已保存 ${view.completedCount}/${view.totalCount} 个视频片段`;
+      return t('video.segmentsSaved', { done: view.completedCount, total: view.totalCount });
     }
     return '';
   }
@@ -1554,23 +1582,23 @@ export class AgentStreamComponent implements AfterViewInit {
 
   public getScreenRecordingButtonTitle(): string {
     if (this.agentService.isCurrentSessionRunning()) {
-      return '任务正在执行中（正在录制屏幕）';
+      return t('video.taskRunning');
     }
     if (this.agentService.currentSessionRecordingStatus() === 'processing') {
-      return '正在准备屏幕录制...';
+      return t('video.preparing');
     }
     if (this.agentService.currentSessionVideoUrl()) {
-      return '播放屏幕录制视频';
+      return t('video.play');
     }
     if (this.agentService.hasCurrentSessionStepFrames()) {
       return this.agentService.currentSessionRecordingStatus() === 'failed'
-        ? '视频录制失败 —— 点击可回放单步截图'
-        : '播放单步截图回放';
+        ? t('video.failedClickToReplay')
+        : t('video.playSteps');
     }
     if (this.agentService.currentSessionRecordingStatus() === 'failed') {
-      return '屏幕录制生成失败';
+      return t('video.generateFailed');
     }
-    return '屏幕录制';
+    return t('video.title.label');
   }
 
   public isDeviceActionTool(tool: any): boolean {
@@ -1639,11 +1667,11 @@ export class AgentStreamComponent implements AfterViewInit {
   public getCheckerPhaseLabel(block: any): string {
     switch (block?.data?.phase) {
       case 'final':
-        return '最终校验';
+        return t('checker.finalCheck');
       case 'outcome':
-        return '校验结果';
+        return t('checker.result');
       default:
-        return '校验';
+        return t('checker.check');
     }
   }
 
@@ -1660,8 +1688,8 @@ export class AgentStreamComponent implements AfterViewInit {
 
   /** How the item is judged, in plain words (verify = must pass, assert = recorded test result). */
   public getCheckMethodLabel(item: any, block: any): string {
-    const parts: string[] = [item?.kind === 'assert' ? '测试断言' : '必须通过'];
-    if (item?.when === 'at_end' && block?.data?.phase !== 'final') parts.push('任务结束时');
+    const parts: string[] = [item?.kind === 'assert' ? t('checker.assertion') : t('checker.mustPass')];
+    if (item?.when === 'at_end' && block?.data?.phase !== 'final') parts.push(t('checker.atEnd'));
     return parts.join(' · ');
   }
 
@@ -1680,15 +1708,15 @@ export class AgentStreamComponent implements AfterViewInit {
   public getVerdictStatusText(status: string): string {
     switch (status) {
       case 'passed':
-        return '已通过';
+        return t('checker.passed');
       case 'failed':
-        return '未通过';
+        return t('checker.failed');
       case 'inconclusive':
-        return '无法确认';
+        return t('checker.inconclusive');
       case 'superseded':
-        return '已被更新的校验取代';
+        return t('checker.supersededBy');
       case 'unchecked':
-        return '未校验';
+        return t('checker.notChecked');
       default:
         return status || '';
     }
@@ -1706,9 +1734,9 @@ export class AgentStreamComponent implements AfterViewInit {
     if (d.phase === 'outcome') return Array.isArray(d.last_findings) ? d.last_findings : [];
     const notes: string[] = [];
     if (Array.isArray(d.unmet_subgoals)) {
-      for (const text of d.unmet_subgoals) notes.push(`尚未完成: ${text}`);
+      for (const text of d.unmet_subgoals) notes.push(t('checker.note.unfinished', { text }));
     }
-    if (d.reverted) notes.push('该步骤已被退回重新执行。');
+    if (d.reverted) notes.push(t('checker.note.reverted'));
     if (d.error) notes.push(String(d.error));
     return notes;
   }
@@ -1759,33 +1787,34 @@ export class AgentStreamComponent implements AfterViewInit {
   public getCheckerStatusLabel(block: any): string {
     const d = block?.data || {};
     if (d.phase === 'outcome') {
-      const t = d.tests || {};
-      const label = d.task_status === 'completed' ? '目标已完成'
-        : (d.task_status === 'blocked' ? '已阻塞' : '部分完成');
+      // Named `tests`, not `t`: a local `t` would shadow the imported translator.
+      const tests = d.tests || {};
+      const label = d.task_status === 'completed' ? t('checker.goalCompleted')
+        : (d.task_status === 'blocked' ? t('checker.blocked') : t('checker.partiallyCompleted'));
       const counts = [
-        [t.passed, '项通过'],
-        [t.failed, '项未通过'],
-        [t.inconclusive, '项结论不明'],
-        [t.unchecked, '项未校验']
+        [tests.passed, t('checker.count.passed')],
+        [tests.failed, t('checker.count.failed')],
+        [tests.inconclusive, t('checker.count.inconclusive')],
+        [tests.unchecked, t('checker.count.notChecked')]
       ]
         .filter(([n]) => Number(n) > 0)
         .map(([n, word]) => `${n} ${word}`);
       return counts.length > 0 ? `${label} · ${counts.join(' · ')}` : label;
     }
-    if (d.isCompleted === false) return '校验中…';
+    if (d.isCompleted === false) return t('checker.checking');
     switch (d.status) {
       case 'superseded':
-        return '已被取代';
+        return t('checker.superseded');
       case 'unchecked':
-        return '未校验';
+        return t('checker.notChecked');
       case 'error':
-        return '暂无判定结论';
+        return t('checker.noVerdict');
     }
     const verdicts = this.getCheckerVerdicts(block);
     const failed = verdicts.filter((v) => v.status === 'failed').length;
-    if (failed > 0) return `${failed} 项未通过`;
-    if (verdicts.some((v) => v.status === 'inconclusive')) return '结论不明';
-    return verdicts.length > 0 ? '已通过' : '已完成';
+    if (failed > 0) return t('checker.summaryFailed', { count: failed });
+    if (verdicts.some((v) => v.status === 'inconclusive')) return t('checker.inconclusiveTitle');
+    return verdicts.length > 0 ? t('checker.passed') : t('checker.done');
   }
 
   public getVerdictIcon(status: string): string {
@@ -1863,12 +1892,14 @@ export class AgentStreamComponent implements AfterViewInit {
   }
 
   public getLLMErrorText(tool: any): string {
-    const noDetails = 'AI 服务在请求失败后未返回具体的错误详情。';
+    const noDetails = t('failure.noDetails');
     if (!tool) return noDetails;
     const rawError = tool.payload?.error || tool.error;
     if (!rawError) return noDetails;
     const cleaned = this.cleanErrorMessage(rawError);
-    return (cleaned === 'Unknown error' || cleaned === '未知错误') ? noDetails : cleaned;
+    // Compare against the translated sentinel, not a hard-coded literal: the
+    // previous Chinese-only check missed the English locale entirely.
+    return cleaned === t('common.unknownError') ? noDetails : cleaned;
   }
 
   public isLLMRetry(tool: any): boolean {
@@ -2162,16 +2193,19 @@ export class AgentStreamComponent implements AfterViewInit {
   }
 
   public getArchitectureTooltip(model?: ModelInfo | null): string {
-    if (!model) return '智能体运行架构: ARTEMIS Flash（单模型实时响应式循环）';
+    const label = t('runInfo.archLabel');
+    if (!model) return `${label}${t('runInfo.arch.flash')}`;
     const name = this.getModelDisplayName(model.name);
     const isPro = name.toLowerCase().includes('pro');
-    const archDesc = isPro
-      ? 'ARTEMIS Pro（多智能体认知状态图）'
-      : 'ARTEMIS Flash（单模型实时响应式循环）';
+    const archDesc = isPro ? t('runInfo.arch.pro') : t('runInfo.arch.flash');
     if (model.id) {
-      return `智能体运行架构: ${archDesc} · 模型: ${model.id} (${model.provider || 'google'})`;
+      return `${label}${t('runInfo.withModel', {
+        arch: archDesc,
+        model: model.id,
+        provider: model.provider || 'google'
+      })}`;
     }
-    return `智能体运行架构: ${archDesc}`;
+    return `${label}${archDesc}`;
   }
 
   public formatTokenCount(tokens?: number): string {
@@ -2181,9 +2215,13 @@ export class AgentStreamComponent implements AfterViewInit {
   public getTokenTooltip(phase: PhaseBlock): string {
     if (!phase.tokens) return '';
     if (phase.promptTokens && phase.completionTokens) {
-      return `已消耗: ${phase.tokens.toLocaleString()} Token（输入 ${phase.promptTokens.toLocaleString()} / 输出 ${phase.completionTokens.toLocaleString()}）`;
+      return t('runInfo.consumedFull', {
+        total: phase.tokens.toLocaleString(),
+        input: phase.promptTokens.toLocaleString(),
+        output: phase.completionTokens.toLocaleString()
+      });
     }
-    return `已消耗: ${phase.tokens.toLocaleString()} Token`;
+    return t('runInfo.consumed', { total: phase.tokens.toLocaleString() });
   }
 
   public isCurrentSessionActive(): boolean {
