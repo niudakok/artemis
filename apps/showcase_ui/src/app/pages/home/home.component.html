@@ -32,7 +32,7 @@
     <!-- Task entry section -->
     <section class="hero-section">
       <h1 class="hero-title">
-        想在手机上执行什么任务？
+        {{ 'ui.whatToRun' | t }}
       </h1>
     </section>
 
@@ -50,7 +50,7 @@
           } @else {
             <span class="material-symbols-outlined tab-icon">tune</span>
           }
-          <span class="tab-label">系统环境与设备准备</span>
+          <span class="tab-label">{{ 'ui.systemSetupPrerequisites' | t }}</span>
         </button>
 
         <button
@@ -64,7 +64,7 @@
           } @else {
             <span class="material-symbols-outlined tab-icon">rocket_launch</span>
           }
-          <span class="tab-label">启动自主执行任务</span>
+          <span class="tab-label">{{ 'ui.launchAutonomousTask' | t }}</span>
         </button>
       </div>
     </div>
@@ -90,9 +90,9 @@
     </div>
     <div class="step-info">
       <div class="step-title-row">
-        <h3 class="step-title">系统与运行环境</h3>
+        <h3 class="step-title">{{ 'ui.systemEnvironment' | t }}</h3>
       </div>
-      <p class="step-desc">核心工具链、Android ADB 调试桥与屏幕录制套件</p>
+      <p class="step-desc">{{ 'ui.coreToolsAndroidDebugBridgeAndVideoRecordingRuntime' | t }}</p>
     </div>
 
     <button
@@ -100,10 +100,10 @@
       class="btn-header-action"
       [disabled]="isRefreshingDiagnostics()"
       (click)="refreshReadiness()"
-      title="重新体检所有系统环境依赖"
+      [title]="'ui.reCheckAllSystemDependencies' | t"
     >
       <span class="material-symbols-outlined" [class.spinning]="isRefreshingDiagnostics()">refresh</span>
-      <span>{{ isRefreshingDiagnostics() ? '体检中...' : '重新体检' }}</span>
+      <span>{{ isRefreshingDiagnostics() ? ('ui.checking' | t) : ('ui.reCheck' | t) }}</span>
     </button>
   </div>
 
@@ -117,7 +117,7 @@
         </div>
         <div class="install-bar-text">
           <div class="install-bar-title-row">
-            <div class="install-bar-title">一键全自动环境依赖安装</div>
+            <div class="install-bar-title">{{ 'ui.automatedDependencySetup' | t }}</div>
             <div class="os-selector-pills">
               <button type="button" class="os-pill" [class.active]="effectiveOs() === 'linux'"
                 (click)="setSelectedOs('linux')">Linux</button>
@@ -127,7 +127,7 @@
                 (click)="setSelectedOs('windows')">Windows</button>
             </div>
           </div>
-          <div class="install-bar-desc">在系统终端中运行以下命令自动安装 ADB、FFmpeg、scrcpy 及项目环境依赖：</div>
+          <div class="install-bar-desc">{{ 'ui.runInTerminalToInstallADBFFmpegScrcpyAndProjectDependencie' | t }}</div>
         </div>
       </div>
       <div class="code-box small-box">
@@ -136,7 +136,7 @@
           (click)="copyToClipboard(oneClickSetupCmd(), 'one_click_deps')">
           <span class="material-symbols-outlined">{{ copiedId() === 'one_click_deps' ? 'check' : 'content_copy'
             }}</span>
-          <span>{{ copiedId() === 'one_click_deps' ? '已复制!' : '复制' }}</span>
+          <span>{{ copiedId() === 'one_click_deps' ? ('ui.oneClickDeps' | t) : ('ui.copied' | t) }}</span>
         </button>
       </div>
     </div>
@@ -153,8 +153,8 @@
             <span class="material-symbols-outlined item-icon">terminal</span>
           </div>
           <div class="item-title-group">
-            <div class="item-name">Python 运行环境</div>
-            <div class="item-subtitle">{{ pythonProbe()?.summary || '正在检测…' }}</div>
+            <div class="item-name">{{ 'ui.pythonRuntime' | t }}</div>
+            <div class="item-subtitle">{{ pythonProbe()?.summary || ('ui.checking2' | t) }}</div>
           </div>
           <div class="item-status">
             <span class="status-dot" [class.dot-pass]="pythonProbe()?.status === 'pass'" [class.dot-fail]="pythonProbe()?.status === 'fail'"></span>
@@ -170,7 +170,7 @@
                 (click)="copyToClipboard('uv python install 3.12', 'py_install')">
                 <span class="material-symbols-outlined">{{ copiedId() === 'py_install' ? 'check' : 'content_copy'
                   }}</span>
-                <span>{{ copiedId() === 'py_install' ? '已复制!' : '复制' }}</span>
+                <span>{{ copiedId() === 'py_install' ? ('ui.pyInstall' | t) : ('ui.copied' | t) }}</span>
               </button>
             </div>
           </div>
@@ -186,8 +186,8 @@
             <span class="material-symbols-outlined item-icon">construction</span>
           </div>
           <div class="item-title-group">
-            <div class="item-name">Android 调试桥 (Platform-Tools)</div>
-            <div class="item-subtitle">{{ !adbProbe() ? '正在检测…' : (adbProbe()?.metadata?.['installed'] ? 'ADB 已安装' : 'ADB 未安装') }}</div>
+            <div class="item-name">{{ 'ui.androidPlatformTools' | t }}</div>
+            <div class="item-subtitle">{{ !adbProbe() ? ('ui.checking2' | t) : (adbProbe()?.metadata?.['installed'] ? ('ui.installed' | t) : ('ui.adbInstalled' | t)) }}</div>
           </div>
           <div class="item-status">
             <span class="status-dot" [class.dot-pass]="adbProbe()?.metadata?.['installed']" [class.dot-fail]="adbProbe()?.status === 'fail'"></span>
@@ -203,7 +203,7 @@
                 (click)="copyToClipboard(adbInstallCmd(), 'env_adb_cmd')">
                 <span class="material-symbols-outlined">{{ copiedId() === 'env_adb_cmd' ? 'check' : 'content_copy'
                   }}</span>
-                <span>{{ copiedId() === 'env_adb_cmd' ? '已复制!' : '复制' }}</span>
+                <span>{{ copiedId() === 'env_adb_cmd' ? ('ui.envAdbCmd' | t) : ('ui.copied' | t) }}</span>
               </button>
             </div>
           </div>
@@ -219,8 +219,8 @@
             <span class="material-symbols-outlined item-icon">tune</span>
           </div>
           <div class="item-title-group">
-            <div class="item-name">系统核心配置</div>
-            <div class="item-subtitle">{{ configProbe()?.summary || '配置有效' }}</div>
+            <div class="item-name">{{ 'ui.systemConfiguration' | t }}</div>
+            <div class="item-subtitle">{{ configProbe()?.summary || ('ui.configValid' | t) }}</div>
           </div>
           <div class="item-status">
             <span class="status-dot" [class.dot-pass]="configProbe()?.status === 'pass'" [class.dot-fail]="configProbe()?.status === 'fail'"></span>
@@ -236,7 +236,7 @@
                 (click)="copyToClipboard('artemis init', 'cfg_init')">
                 <span class="material-symbols-outlined">{{ copiedId() === 'cfg_init' ? 'check' : 'content_copy'
                   }}</span>
-                <span>{{ copiedId() === 'cfg_init' ? '已复制!' : '复制' }}</span>
+                <span>{{ copiedId() === 'cfg_init' ? ('ui.cfgInit' | t) : ('ui.copied' | t) }}</span>
               </button>
             </div>
           </div>
@@ -252,7 +252,7 @@
             <span class="material-symbols-outlined item-icon">videocam</span>
           </div>
           <div class="item-title-group">
-            <div class="item-name">录屏与视频工具链</div>
+            <div class="item-name">{{ 'ui.videoToolchain' | t }}</div>
             <div class="item-subtitle">{{ toolchainProbe()?.summary || 'FFmpeg & scrcpy' }}</div>
           </div>
           <div class="item-status">
@@ -269,7 +269,7 @@
                 (click)="copyToClipboard(toolchainInstallCmd(), 'install_toolchain')">
                 <span class="material-symbols-outlined">{{ copiedId() === 'install_toolchain' ? 'check' : 'content_copy'
                   }}</span>
-                <span>{{ copiedId() === 'install_toolchain' ? '已复制!' : '复制' }}</span>
+                <span>{{ copiedId() === 'install_toolchain' ? ('ui.installToolchain' | t) : ('ui.copied' | t) }}</span>
               </button>
             </div>
           </div>
@@ -296,9 +296,9 @@
     </div>
     <div class="step-info">
       <div class="step-title-row">
-        <h3 class="step-title">大模型配置 (AI Model)</h3>
+        <h3 class="step-title">{{ 'ui.aiModelSetup' | t }}</h3>
       </div>
-      <p class="step-desc">Google Gemini 或自定义大模型提供商（OpenAI、中转站、Claude、Ollama 等）</p>
+      <p class="step-desc">{{ 'ui.googleGeminiOrCustomLLMProvidersOpenAIClaudeOllama' | t }}</p>
     </div>
   </div>
 
@@ -328,9 +328,9 @@
           <div class="choice-text">
             <div class="choice-title-row">
               <span class="choice-title">Google Gemini</span>
-              <span class="tag-badge tag-rec">推荐首选</span>
+              <span class="tag-badge tag-rec">{{ 'ui.recommended' | t }}</span>
             </div>
-            <p class="choice-desc">高速多模态屏幕视觉推理，支持 Google AI Studio 官方免费 API Key。</p>
+            <p class="choice-desc">{{ 'ui.fastMultimodalReasoningWithFreeAPIKeyFromGoogleAIStudio' | t }}</p>
           </div>
         </div>
       </div>
@@ -346,9 +346,9 @@
           </div>
           <div class="choice-text">
             <div class="choice-title-row">
-              <span class="choice-title">自定义模型 / 中转站配置</span>
+              <span class="choice-title">{{ 'ui.customConfiguration' | t }}</span>
             </div>
-            <p class="choice-desc">在 <code>config/artemis.jsonc</code> 定义模型并在 <code>.env</code> 配置 Base URL 与密钥 (支持中转站、OpenAI、Claude、私有化 Ollama)。</p>
+            <p class="choice-desc">{{ 'ui.text' | t }} <code>config/artemis.jsonc</code> {{ 'ui.text2' | t }} <code>.env</code> {{ 'ui.baseURLOpenAIClaudeOllama' | t }}</p>
           </div>
         </div>
       </div>
@@ -361,12 +361,12 @@
       <div class="input-box-header">
         <div class="header-label">
           <span class="material-symbols-outlined label-icon">vpn_key</span>
-          <span>输入 Google Gemini API 密钥：</span>
+          <span>{{ 'ui.enterGeminiAPIKey' | t }}</span>
         </div>
         <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer"
           class="btn-header-link">
           <span class="material-symbols-outlined">open_in_new</span>
-          <span>免费获取 API Key (Google AI Studio 官网)</span>
+          <span>{{ 'ui.getFreeAPIKeyGoogleAIStudio' | t }}</span>
         </a>
       </div>
 
@@ -375,11 +375,11 @@
           <span class="material-symbols-outlined key-prefix-icon">key</span>
           <input [type]="showGeminiKey() ? 'text' : 'password'" class="unified-key-input"
             [class.is-masked]="!showGeminiKey()" [ngModel]="geminiKeyInput()"
-            (ngModelChange)="onGeminiKeyChange($event)" placeholder="请输入 Gemini API Key (如 AIzaSy...)"
+            (ngModelChange)="onGeminiKeyChange($event)" [attr.placeholder]="'ui.enterGeminiAPIKeyEGAIzaSy' | t"
             spellcheck="false" autocomplete="off" />
 
           <!-- Visibility Toggle -->
-          <button type="button" class="btn-icon-action" [title]="showGeminiKey() ? '隐藏密钥' : '显示明文'"
+          <button type="button" class="btn-icon-action" [title]="showGeminiKey() ? ('ui.maskKey' | t) : ('ui.showPlaintext' | t)"
             (click)="toggleGeminiKeyVisibility()">
             <span class="material-symbols-outlined">
               {{ showGeminiKey() ? 'visibility_off' : 'visibility' }}
@@ -388,7 +388,7 @@
 
           <!-- Copy Button -->
           @if (geminiKeyInput()) {
-          <button type="button" class="btn-icon-action" title="复制 API 密钥"
+          <button type="button" class="btn-icon-action" [title]="'ui.copyAPIKey' | t"
             (click)="copyToClipboard(geminiKeyInput(), 'gemini_key_field')">
             <span class="material-symbols-outlined" [class.text-emerald]="copiedId() === 'gemini_key_field'">
               {{ copiedId() === 'gemini_key_field' ? 'check' : 'content_copy' }}
@@ -405,19 +405,19 @@
           <span>{{ geminiKeyInput().trim() ? 'Verifying & Saving...' : 'Clearing...' }}</span>
           } @else {
           <span class="material-symbols-outlined">{{ geminiKeyInput().trim() ? 'save' : 'delete_outline' }}</span>
-          <span>{{ !geminiKeyInput().trim() ? '清除密钥' : (isGeminiModified() ? '保存并立即生效' : '保存密钥') }}</span>
+          <span>{{ !geminiKeyInput().trim() ? ('ui.clearKey' | t) : (isGeminiModified() ? ('ui.saveApply' | t) : ('ui.saveKey' | t)) }}</span>
           }
         </button>
 
         <!-- Test Button -->
-        <button type="button" class="btn-unified-test" title="测试 Gemini API 密钥是否有效"
+        <button type="button" class="btn-unified-test" [title]="'ui.testIfGeminiAPIKeyIsValid' | t"
           [disabled]="isTestingGeminiKey() || isSavingGeminiKey() || !geminiKeyInput().trim()" (click)="testGeminiKey()">
           @if (isTestingGeminiKey()) {
           <span class="material-symbols-outlined spin">sync</span>
-          <span>测试连接中...</span>
+          <span>{{ 'ui.testing' | t }}</span>
           } @else {
           <span class="material-symbols-outlined">network_check</span>
-          <span>测试密钥</span>
+          <span>{{ 'ui.testKey' | t }}</span>
           }
         </button>
       </div>
@@ -442,13 +442,13 @@
         <div class="toggle-bar-left">
           <span class="material-symbols-outlined icon-ocr">document_scanner</span>
           <div class="toggle-bar-titles">
-            <span class="ocr-main-title">可选增强：Google Cloud Vision OCR 屏幕视觉文字识别</span>
+            <span class="ocr-main-title">{{ 'ui.optionalGoogleCloudVisionOCR' | t }}</span>
           </div>
         </div>
 
         <div class="toggle-bar-right">
           @if (isOcrConfigured()) {
-            <span class="status-dot dot-pass" title="OCR 已配置"></span>
+            <span class="status-dot dot-pass" [title]="'ui.ocrConfigured' | t"></span>
           }
           <span class="material-symbols-outlined caret-icon">
             {{ showOcrConfig() ? 'expand_less' : 'expand_more' }}
@@ -459,7 +459,7 @@
       @if (showOcrConfig()) {
       <div class="ocr-content-body">
         <p class="ocr-help-desc">
-          为纯文字密集的复杂 App 提供端侧文字绝对坐标定位增强，显著提升元素识别精准度。
+          {{ 'ui.ocrEnhance' | t }}
         </p>
 
         <!-- Input Box -->
@@ -467,7 +467,7 @@
           <div class="input-box-header">
             <div class="header-label">
               <span class="material-symbols-outlined label-icon">key</span>
-              <span>Cloud Vision API 密钥：</span>
+              <span>{{ 'ui.cloudVisionAPIKey' | t }}</span>
             </div>
           </div>
 
@@ -476,10 +476,10 @@
               <span class="material-symbols-outlined key-prefix-icon">key</span>
               <input [type]="showOcrKey() ? 'text' : 'password'" class="unified-key-input" [class.is-masked]="!showOcrKey()"
                 [ngModel]="ocrKeyInput()" (ngModelChange)="onOcrKeyChange($event)"
-                placeholder="请输入 Vision OCR API Key (如 AIzaSy...)" spellcheck="false" autocomplete="off" />
+                [attr.placeholder]="'ui.enterVisionOCRAPIKeyEGAIzaSy' | t" spellcheck="false" autocomplete="off" />
           
               <!-- Visibility Toggle -->
-              <button type="button" class="btn-icon-action" [title]="showOcrKey() ? '隐藏密钥' : '显示明文'"
+              <button type="button" class="btn-icon-action" [title]="showOcrKey() ? ('ui.maskKey' | t) : ('ui.showPlaintext' | t)"
                 (click)="toggleOcrKeyVisibility()">
                 <span class="material-symbols-outlined">
                   {{ showOcrKey() ? 'visibility_off' : 'visibility' }}
@@ -488,7 +488,7 @@
           
               <!-- Copy Button -->
               @if (ocrKeyInput()) {
-              <button type="button" class="btn-icon-action" title="复制 API 密钥"
+              <button type="button" class="btn-icon-action" [title]="'ui.copyAPIKey' | t"
                 (click)="copyToClipboard(ocrKeyInput(), 'ocr_key_field')">
                 <span class="material-symbols-outlined" [class.text-emerald]="copiedId() === 'ocr_key_field'">
                   {{ copiedId() === 'ocr_key_field' ? 'check' : 'content_copy' }}
@@ -502,22 +502,22 @@
               [disabled]="isSavingOcrKey() || isTestingOcrKey() || (!isOcrModified() && !ocrKeyInput().trim())" (click)="saveOcrKey()">
               @if (isSavingOcrKey()) {
               <span class="material-symbols-outlined spin">sync</span>
-              <span>{{ ocrKeyInput().trim() ? '正在校验并保存...' : '正在清除...' }}</span>
+              <span>{{ ocrKeyInput().trim() ? ('ui.verifyingSaving' | t) : ('ui.clearing' | t) }}</span>
               } @else {
               <span class="material-symbols-outlined">{{ ocrKeyInput().trim() ? 'save' : 'delete_outline' }}</span>
-              <span>{{ !ocrKeyInput().trim() ? '清除密钥' : (isOcrModified() ? '保存并生效' : '保存密钥') }}</span>
+              <span>{{ !ocrKeyInput().trim() ? ('ui.clearKey' | t) : (isOcrModified() ? ('ui.saveApply' | t) : ('ui.saveKey' | t)) }}</span>
               }
             </button>
 
             <!-- Test Button -->
-            <button type="button" class="btn-unified-test" title="测试 Vision OCR 密钥是否有效"
+            <button type="button" class="btn-unified-test" [title]="'ui.testIfVisionOCRKeyIsValid' | t"
               [disabled]="isTestingOcrKey() || isSavingOcrKey() || !ocrKeyInput().trim()" (click)="testOcrKey()">
               @if (isTestingOcrKey()) {
               <span class="material-symbols-outlined spin">sync</span>
-              <span>测试连接中...</span>
+              <span>{{ 'ui.testing' | t }}</span>
               } @else {
               <span class="material-symbols-outlined">network_check</span>
-              <span>测试密钥</span>
+              <span>{{ 'ui.testKey' | t }}</span>
               }
             </button>
           </div>
@@ -548,25 +548,25 @@
           <div class="inspector-header-left">
             <span class="material-symbols-outlined header-icon">tune</span>
             <div class="inspector-header-titles">
-              <span class="inspector-title">当前模型生效配置</span>
-              <span class="inspector-subtitle">定义于配置文件：
+              <span class="inspector-title">{{ 'ui.activeModelConfiguration' | t }}</span>
+              <span class="inspector-subtitle">{{ 'ui.definedIn' | t }} 
                 <code>{{ modelConfigEnv()?.config_path || 'config/artemis.jsonc' }}</code></span>
             </div>
           </div>
           <div class="inspector-header-actions">
-            <button type="button" class="btn-file-action" title="复制文件路径"
+            <button type="button" class="btn-file-action" [title]="'ui.copyFilePath' | t"
               (click)="copyToClipboard(modelConfigEnv()?.config_path || 'config/artemis.jsonc', 'config_path_btn')"
             >
               <span class="material-symbols-outlined" [class.text-emerald]="copiedId() === 'config_path_btn'">
                 {{ copiedId() === 'config_path_btn' ? 'check' : 'content_copy' }}
               </span>
-              <span>复制路径</span>
+              <span>{{ 'ui.copyPath' | t }}</span>
               </button>
               <button type="button" class="btn-file-action btn-toggle-code" (click)="toggleFullConfigFile()">
                 <span class="material-symbols-outlined">
                   {{ showFullConfigFile() ? 'unfold_less' : 'code' }}
                 </span>
-                <span>{{ showFullConfigFile() ? '收起配置' : '查看完整配置' }}</span>
+                <span>{{ showFullConfigFile() ? ('ui.hideJSONC' | t) : ('ui.viewJSONC' | t) }}</span>
             </button>
           </div>
           </div>
@@ -574,7 +574,7 @@
           <!-- Model Summary Row -->
           <div class="inspector-summary-row">
             <div class="summary-metric">
-              <span class="metric-label">默认全局模型</span>
+              <span class="metric-label">{{ 'ui.defaultModel' | t }}</span>
               <div class="metric-val-pill">
                 <span class="provider-dot"></span>
                 <span class="provider-name">{{ modelConfigEnv()?.default_model?.provider || 'google' }}</span>
@@ -585,7 +585,7 @@
           
             @if (modelConfigEnv()?.default_model?.fallback) {
             <div class="summary-metric">
-              <span class="metric-label">故障兜底模型</span>
+              <span class="metric-label">{{ 'ui.fallbackModel' | t }}</span>
               <div class="metric-val-pill secondary">
                 <span>{{ modelConfigEnv()?.default_model?.fallback?.provider }}/{{
                   modelConfigEnv()?.default_model?.fallback?.model }}</span>
@@ -609,17 +609,17 @@
           <div class="inspector-header-left">
             <span class="material-symbols-outlined header-icon">vpn_key</span>
             <div class="inspector-header-titles">
-              <span class="inspector-title">环境变量与 API 密钥列表 (.env)</span>
-              <span class="inspector-subtitle">加载自配置文件：<code>{{ modelConfigEnv()?.env_path || '.env' }}</code></span>
+              <span class="inspector-title">{{ 'ui.environmentVariablesAPIKeys' | t }}</span>
+              <span class="inspector-subtitle">{{ 'ui.loadedFrom' | t }}<code>{{ modelConfigEnv()?.env_path || '.env' }}</code></span>
             </div>
           </div>
       
-          <button type="button" class="btn-file-action" title="复制文件路径"
+          <button type="button" class="btn-file-action" [title]="'ui.copyFilePath' | t"
             (click)="copyToClipboard(modelConfigEnv()?.env_path || '.env', 'env_path_btn')">
           <span class="material-symbols-outlined" [class.text-emerald]="copiedId() === 'env_path_btn'">
             {{ copiedId() === 'env_path_btn' ? 'check' : 'content_copy' }}
           </span>
-          <span>复制路径</span>
+          <span>{{ 'ui.copyPath' | t }}</span>
           </button>
         </div>
         
@@ -634,7 +634,7 @@
               @if (envItem.is_set) {
               <span class="badge-env-pass">
                 <span class="material-symbols-outlined">check_circle</span>
-                <span>已配置</span>
+                <span>{{ 'ui.configured' | t }}</span>
                 @if (envItem.preview) {
                 <code class="key-preview">({{ envItem.preview }})</code>
                 }
@@ -642,7 +642,7 @@
               } @else {
               <span class="badge-env-unset">
                 <span class="material-symbols-outlined">radio_button_unchecked</span>
-                <span>未配置</span>
+                <span>{{ 'ui.notSet' | t }}</span>
               </span>
               }
             </div>
@@ -671,9 +671,9 @@
             </div>
             <div class="step-info">
               <div class="step-title-row">
-                <h3 class="step-title">Android 设备与真机连接</h3>
+                <h3 class="step-title">{{ 'ui.androidDeviceEmulatorConnection' | t }}</h3>
               </div>
-              <p class="step-desc">本地模拟器、USB 数据线真机、无线调试配对设备或远程 ADB 服务</p>
+              <p class="step-desc">{{ 'ui.localEmulatorAttachedPhoneWirelessDeviceOrAnotherADBServer' | t }}</p>
             </div>
 
             <button
@@ -682,7 +682,7 @@
               (click)="toggleConnectionMethods()"
             >
               <span class="material-symbols-outlined">swap_horiz</span>
-              <span>{{ showConnectionMethods() ? '收起连接选项' : '切换连接方式' }}</span>
+              <span>{{ showConnectionMethods() ? ('ui.hideOptions' | t) : ('ui.changeConnection' | t) }}</span>
             </button>
 
             <button
@@ -690,17 +690,17 @@
               class="btn-restart-adb"
               [disabled]="isRestartingAdb()"
               (click)="restartAdbServer()"
-              [title]="isRemoteAdbServer() ? '在不中断远程 ADB 服务的前提下刷新设备列表' : '重启本地 ADB 调试服务'"
+              [title]="isRemoteAdbServer() ? ('ui.refreshDevicesWithoutStoppingTheRemoteADBServer' | t) : ('ui.restartLocalADBDaemon' | t)"
             >
               @if (isRestartingAdb()) {
               <span class="material-symbols-outlined spinning">sync</span>
-              <span>正在重启...</span>
+              <span>{{ 'ui.restarting' | t }}</span>
               } @else if (adbRestartFeedback()) {
               <span class="material-symbols-outlined feedback-done">check</span>
               <span class="feedback-text">{{ adbRestartFeedback() }}</span>
               } @else {
               <span class="material-symbols-outlined">sync</span>
-              <span>{{ isRemoteAdbServer() ? '刷新设备列表' : '重启 ADB 调试服务' }}</span>
+              <span>{{ isRemoteAdbServer() ? ('ui.refreshDevices' | t) : ('ui.restartADB' | t) }}</span>
               }
             </button>
           </div>
@@ -722,7 +722,7 @@
                     </div>
                     <div class="device-hero-meta">
                       @if (activeDevice()?.is_emulator) {
-                        <span>虚拟设备/模拟器</span>
+                        <span>{{ 'ui.virtualDevice' | t }}</span>
                         <span class="meta-dot">·</span>
                       }
                       <span>{{ activeDevice()?.serial }}</span>
@@ -737,21 +737,21 @@
                       @if (isRemoteAdbServer()) {
                         <span class="meta-dot">·</span>
                         <span class="remote-endpoint-label">
-                          远程连接 {{ adbServerStatus()?.endpoint?.host }}:{{ adbServerStatus()?.endpoint?.port }}
+                          {{ 'ui.remoteConnect' | t }} {{ adbServerStatus()?.endpoint?.host }}:{{ adbServerStatus()?.endpoint?.port }}
                         </span>
                       }
                     </div>
                   </div>
                   <div class="device-hero-status">
                     <span class="status-dot dot-pass"></span>
-                    <span class="status-text">已连接就绪</span>
+                    <span class="status-text">{{ 'ui.connected' | t }}</span>
                   </div>
                 </div>
 
                 <!-- Multi-Device Switcher if multiple devices detected -->
                 @if (connectedDevices().length > 1) {
                   <div class="multi-device-switcher">
-                    <span class="switcher-label">选择活动控制设备：</span>
+                    <span class="switcher-label">{{ 'ui.selectActiveDevice' | t }}</span>
                     <div class="switcher-chips">
                       @for (dev of connectedDevices(); track dev.serial) {
                         <button
@@ -765,7 +765,7 @@
                           </span>
                           <span>{{ dev.model || dev.serial }}</span>
                           @if (dev.serial === activeDevice()?.serial) {
-                            <span class="active-check">✓ 当前选中</span>
+                            <span class="active-check">{{ 'ui.active' | t }}</span>
                           }
                         </button>
                       }
@@ -787,21 +787,21 @@
                       <div class="tracker-titles">
                         <div class="tracker-main-heading">
                           <h4 class="tracker-title">
-                            Launching Android Emulator: <span class="avd-highlight">{{ emulatorLaunchState()?.avd_name || activeDevice()?.serial || '虚拟设备' }}</span>
+                            Launching Android Emulator: <span class="avd-highlight">{{ emulatorLaunchState()?.avd_name || activeDevice()?.serial || ('ui.virtualDevice' | t) }}</span>
                           </h4>
-                          <span class="stage-tag-badge">{{ emulatorLaunchState()?.status === 'booting' ? '系统启动中' : '正在拉起' }}</span>
+                          <span class="stage-tag-badge">{{ emulatorLaunchState()?.status === 'booting' ? ('ui.booting' | t) : ('ui.osBooting' | t) }}</span>
                         </div>
-                        <p class="tracker-subtitle">{{ emulatorLaunchState()?.stage_message || '正在初始化 Android 虚拟设备...' }}</p>
+                        <p class="tracker-subtitle">{{ emulatorLaunchState()?.stage_message || ('ui.initializingAndroidVirtualDevice' | t) }}</p>
                       </div>
                     </div>
                     <div class="tracker-actions">
                       <button type="button" class="btn-toggle-logs" [class.active]="showLaunchLogs()" (click)="toggleLaunchLogs()">
                         <span class="material-symbols-outlined">terminal</span>
-                        <span>{{ showLaunchLogs() ? '收起日志' : '查看启动日志' }}</span>
+                        <span>{{ showLaunchLogs() ? ('ui.hideLogs' | t) : ('ui.viewBootLogs' | t) }}</span>
                       </button>
-                      <button type="button" class="btn-stop-emu" (click)="stopEmulator()" title="终止模拟器进程">
+                      <button type="button" class="btn-stop-emu" (click)="stopEmulator()" [title]="'ui.terminateEmulatorProcess' | t">
                         <span class="material-symbols-outlined">cancel</span>
-                        <span>停止</span>
+                        <span>{{ 'ui.stop' | t }}</span>
                       </button>
                     </div>
                   </div>
@@ -816,7 +816,7 @@
                           <span class="spinner-tiny"></span>
                         }
                       </div>
-                      <span class="step-label">1. 进程启动</span>
+                      <span class="step-label">{{ 'ui.1ProcessStart' | t }}</span>
                     </div>
 
                     <div class="step-line" [class.done]="emulatorLaunchState()?.progress_percent! >= 35"></div>
@@ -831,7 +831,7 @@
                           <span>2</span>
                         }
                       </div>
-                      <span class="step-label">2. ADB 握手</span>
+                      <span class="step-label">{{ 'ui.2ADBHandshake' | t }}</span>
                     </div>
 
                     <div class="step-line" [class.done]="emulatorLaunchState()?.progress_percent! >= 65"></div>
@@ -846,7 +846,7 @@
                           <span>3</span>
                         }
                       </div>
-                      <span class="step-label">3. Android 系统启动</span>
+                      <span class="step-label">{{ 'ui.3AndroidOSBoot' | t }}</span>
                     </div>
 
                     <div class="step-line" [class.done]="emulatorLaunchState()?.status === 'ready'"></div>
@@ -855,7 +855,7 @@
                       <div class="step-circle">
                         <span class="material-symbols-outlined check-icon">check_circle</span>
                       </div>
-                      <span class="step-label">4. 就绪可用</span>
+                      <span class="step-label">{{ 'ui.4Ready' | t }}</span>
                     </div>
                   </div>
 
@@ -865,10 +865,10 @@
                       <div class="progress-bar-fill" [style.width.%]="emulatorLaunchState()?.progress_percent || 25"></div>
                     </div>
                     <div class="progress-bar-meta">
-                      <span class="progress-percent">已完成 {{ emulatorLaunchState()?.progress_percent || 25 }}%</span>
+                      <span class="progress-percent">{{ 'ui.progressDone' | t: { percent: emulatorLaunchState()?.progress_percent || 25 } }}%</span>
                       <span class="progress-timer">
                         <span class="material-symbols-outlined timer-icon">timer</span>
-                        已耗时：{{ emulatorLaunchState()?.elapsed_seconds || 0 }} 秒
+                        {{ 'ui.elapsed' | t: { seconds: emulatorLaunchState()?.elapsed_seconds || 0 } }}
                       </span>
                     </div>
                   </div>
@@ -876,7 +876,7 @@
                   <!-- Helpful Status Notice -->
                   <div class="boot-tip-banner">
                     <span class="material-symbols-outlined tip-icon">info</span>
-                    <span>Android 模拟器冷启动通常需要 20-45 秒，上方会实时显示启动进度，请勿重复点击启动按钮。</span>
+                    <span>{{ 'ui.androidVirtualizationColdBootUsuallyTakes2045SecondsLivePr' | t }}</span>
                   </div>
 
                   <!-- Expandable Console Log Stream -->
@@ -885,14 +885,14 @@
                       <div class="logs-header">
                         <div class="logs-header-left">
                           <span class="material-symbols-outlined">terminal</span>
-                          <span>模拟器控制台实时输出流 (stdout / stderr)</span>
+                          <span>{{ 'ui.emulatorConsoleStreamStdoutStderr' | t }}</span>
                         </div>
                         <button type="button" class="btn-copy-logs" (click)="copyToClipboard(emulatorLaunchState()?.logs?.join('\n') || '', 'boot_logs')">
                           <span class="material-symbols-outlined">{{ copiedId() === 'boot_logs' ? 'check' : 'content_copy' }}</span>
-                          <span>{{ copiedId() === 'boot_logs' ? '已复制' : '复制日志' }}</span>
+                          <span>{{ copiedId() === 'boot_logs' ? ('ui.bootLogs' | t) : ('ui.copied2' | t) }}</span>
                         </button>
                       </div>
-                      <pre class="logs-body">@if (emulatorLaunchState()?.logs?.length) {@for (log of emulatorLaunchState()?.logs; track log) {<div class="log-line">{{ log }}</div>}} @else {<div class="log-empty">等待进程输出...</div>}</pre>
+                      <pre class="logs-body">@if (emulatorLaunchState()?.logs?.length) {@for (log of emulatorLaunchState()?.logs; track log) {<div class="log-line">{{ log }}</div>}} @else {<div class="log-empty">{{ 'ui.waitingForProcessOutput' | t }}</div>}</pre>
                     </div>
                   }
                 </div>
@@ -909,11 +909,11 @@
                         <span class="material-symbols-outlined failed-icon">error</span>
                       </div>
                       <div class="failed-titles">
-                        <h4 class="failed-title">模拟器启动失败</h4>
-                        <p class="failed-desc">{{ emulatorLaunchState()?.error || 'Android 模拟器进程启动失败或在初始化过程中崩溃。' }}</p>
+                        <h4 class="failed-title">{{ 'ui.emulatorLaunchFailed' | t }}</h4>
+                        <p class="failed-desc">{{ emulatorLaunchState()?.error || ('ui.theAndroidEmulatorProcessFailedToStartOrCrashedDuringIniti' | t) }}</p>
                       </div>
                     </div>
-                    <button type="button" class="btn-dismiss-failed" (click)="dismissEmulatorStatus()" title="关闭提示">
+                    <button type="button" class="btn-dismiss-failed" (click)="dismissEmulatorStatus()" [title]="'ui.dismissError' | t">
                       <span class="material-symbols-outlined">close</span>
                     </button>
                   </div>
@@ -921,10 +921,10 @@
                   @if (emulatorLaunchState()?.logs?.length) {
                     <div class="failed-logs-box">
                       <div class="logs-header">
-                        <span>进程输出 / 失败日志：</span>
+                        <span>{{ 'ui.processOutputFailureLogs' | t }}</span>
                         <button type="button" class="btn-copy-logs" (click)="copyToClipboard(emulatorLaunchState()?.logs?.join('\n') || '', 'fail_logs')">
                           <span class="material-symbols-outlined">{{ copiedId() === 'fail_logs' ? 'check' : 'content_copy' }}</span>
-                          <span>{{ copiedId() === 'fail_logs' ? '已复制' : '复制日志' }}</span>
+                          <span>{{ copiedId() === 'fail_logs' ? ('ui.failLogs' | t) : ('ui.copied2' | t) }}</span>
                         </button>
                       </div>
                       <pre class="failed-logs-pre">@for (log of emulatorLaunchState()?.logs; track log) {<div class="log-line">{{ log }}</div>}</pre>
@@ -935,15 +935,15 @@
                     @if (emulatorLaunchState()?.avd_name) {
                       <button type="button" class="btn-retry-launch" [disabled]="isRemoteAdbServer()" (click)="launchAvdEmulator(emulatorLaunchState()!.avd_name!)">
                         <span class="material-symbols-outlined">refresh</span>
-                        <span>重新启动 ({{ emulatorLaunchState()?.avd_name }})</span>
+                        <span>{{ 'ui.restartAvd' | t: { name: emulatorLaunchState()?.avd_name || '' } }}</span>
                       </button>
                     }
                     <button type="button" class="btn-restart-adb-sub" (click)="restartAdbServer()">
                       <span class="material-symbols-outlined">sync</span>
-                      <span>重启 ADB 服务</span>
+                      <span>{{ 'ui.restartADBServer' | t }}</span>
                     </button>
                     <button type="button" class="btn-dismiss-flat" (click)="dismissEmulatorStatus()">
-                      <span>关闭</span>
+                      <span>{{ 'ui.dismiss' | t }}</span>
                     </button>
                   </div>
                 </div>
@@ -971,9 +971,9 @@
                         </div>
                         <span class="method-desc">
                           @if (installedAvds().length > 0) {
-                            {{ installedAvds().length }} 个本地虚拟设备可用
+                            {{ 'ui.avdsAvailable' | t: { count: installedAvds().length } }}
                           } @else {
-                            Launch a local Android 虚拟设备/模拟器
+                            {{ 'ui.launchAvdLocal' | t }}
                           }
                         </span>
                       </div>
@@ -997,7 +997,7 @@
                         <div class="method-title-row">
                           <span class="method-title">USB Cable</span>
                         </div>
-                        <span class="method-desc">使用 USB 数据线直连真机</span>
+                        <span class="method-desc">{{ 'ui.connectPhysicalPhoneViaUSB' | t }}</span>
                       </div>
                       </div>
                       <div class="method-card-right">
@@ -1019,7 +1019,7 @@
                         <div class="method-title-row">
                           <span class="method-title">Wireless ADB</span>
                         </div>
-                        <span class="method-desc">同局域网 Wi-Fi 无线调试</span>
+                        <span class="method-desc">{{ 'ui.connectOverLocalWiFi' | t }}</span>
                       </div>
                       </div>
                       <div class="method-card-right">
@@ -1041,7 +1041,7 @@
                         <div class="method-title-row">
                           <span class="method-title">Remote Computer</span>
                         </div>
-                        <span class="method-desc">连接局域网另一台主机的 ADB 服务</span>
+                        <span class="method-desc">{{ 'ui.phoneConnectedToAnotherComputer' | t }}</span>
                       </div>
                     </div>
                     <div class="method-card-right">
@@ -1055,9 +1055,9 @@
                     <div class="active-remote-copy">
                       <span class="material-symbols-outlined">hub</span>
                       <span>
-                        Artemis 当前正在使用远程 ADB 服务
+                        {{ 'ui.remoteActive' | t }}
                         <strong>{{ adbServerStatus()?.endpoint?.host }}:{{ adbServerStatus()?.endpoint?.port }}</strong>.
-                        如需使用本地模拟器、USB 数据线或无线调试，请先切换回本地 ADB。
+                        {{ 'ui.remoteActiveHint' | t }}
                       </span>
                     </div>
                     <button
@@ -1067,7 +1067,7 @@
                       (click)="switchToLocalAdbServer()"
                     >
                       <span class="material-symbols-outlined" [class.spinning]="isSwitchingToLocalAdb()">sync</span>
-                      <span>{{ isSwitchingToLocalAdb() ? '正在切换...' : '切换为本地 ADB' }}</span>
+                      <span>{{ isSwitchingToLocalAdb() ? ('ui.switching' | t) : ('ui.useLocalADB' | t) }}</span>
                     </button>
                   </div>
                 }
@@ -1081,8 +1081,8 @@
                         <div class="section-header-bar">
                           <div class="section-title-group">
                             <span class="material-symbols-outlined header-icon">devices</span>
-                            <span class="section-title">已安装的本地虚拟设备 (AVD)</span>
-                            <span class="count-badge">{{ installedAvds().length }} 个可用</span>
+                            <span class="section-title">{{ 'ui.installedVirtualDevicesAVD' | t }}</span>
+                            <span class="count-badge">{{ 'ui.avdsAvailableCount' | t: { count: installedAvds().length } }}</span>
                           </div>
                         </div>
 
@@ -1096,7 +1096,7 @@
                                 <div class="avd-meta">
                                   <div class="avd-heading">
                                     <span class="avd-name">{{ avd }}</span>
-                                    <span class="avd-type-pill">虚拟设备</span>
+                                    <span class="avd-type-pill">{{ 'ui.virtualDevice' | t }}</span>
                                   </div>
                                 </div>
                               </div>
@@ -1108,14 +1108,14 @@
                                   [class.launching]="launchingAvd() === avd || (isEmulatorLaunching() && emulatorLaunchState()?.avd_name === avd)"
                                   [disabled]="isEmulatorLaunching() || isRemoteAdbServer()"
                                   (click)="launchAvdEmulator(avd)"
-                                  [title]="isEmulatorLaunching() ? '已有模拟器正在启动中...' : '启动 ' + avd"
+                                  [title]="isEmulatorLaunching() ? ('ui.anEmulatorIsCurrentlyLaunching' | t) : ('ui.launchVerb' | t) + avd"
                                 >
                                   @if (launchingAvd() === avd || (isEmulatorLaunching() && emulatorLaunchState()?.avd_name === avd)) {
                                     <span class="spinner-icon"></span>
-                                    <span>{{ emulatorLaunchState()?.status === 'booting' ? '系统启动中' : '正在拉起' }} ({{ emulatorLaunchState()?.elapsed_seconds || 0 }}秒)</span>
+                                    <span>{{ emulatorLaunchState()?.status === 'booting' ? ('ui.booting' | t) : ('ui.bootingOS' | t) }} </span>
                                   } @else {
                                     <span class="material-symbols-outlined action-icon">play_arrow</span>
-                                    <span>启动</span>
+                                    <span>{{ 'ui.launch' | t }}</span>
                                   }
                                 </button>
                               </div>
@@ -1132,7 +1132,7 @@
                             </div>
                             <div class="banner-titles">
                               <div class="banner-title-row">
-                                <h4 class="empty-title">未检测到本地 Android 虚拟设备 (AVD)</h4>
+                                <h4 class="empty-title">{{ 'ui.noAndroidVirtualDevicesAVDDetected' | t }}</h4>
                                 <div class="os-selector-pills">
                                   <button type="button" class="os-pill" [class.active]="effectiveOs() === 'linux'"
                                     (click)="setSelectedOs('linux')">Linux</button>
@@ -1142,7 +1142,7 @@
                                     (click)="setSelectedOs('windows')">Windows</button>
                                 </div>
                               </div>
-                              <p class="empty-desc">请按照下方指引安装并启动模拟器，或直接连接真实手机：</p>
+                              <p class="empty-desc">{{ 'ui.followTheStepByStepInstructionsBelowToInstallAndStartAnEmu' | t }}</p>
                             </div>
                           </div>
 
@@ -1154,7 +1154,7 @@
                               (click)="setEmulatorSetupMode('studio')"
                             >
                               <span class="material-symbols-outlined pill-icon">desktop_windows</span>
-                              <span>Android Studio 图形界面 (GUI)</span>
+                              <span>{{ 'ui.androidStudioGUI' | t }}</span>
                             </button>
                             <button
                               type="button"
@@ -1163,7 +1163,7 @@
                               (click)="setEmulatorSetupMode('cli')"
                             >
                               <span class="material-symbols-outlined pill-icon">terminal</span>
-                              <span>命令行方式 (CLI)</span>
+                              <span>{{ 'ui.commandLineCLI' | t }}</span>
                             </button>
                           </div>
                         </div>
@@ -1176,9 +1176,9 @@
                                 <span class="step-number-badge">1</span>
                                 <span class="material-symbols-outlined step-card-icon">download</span>
                               </div>
-                              <div class="step-card-title">安装 Android Studio</div>
+                              <div class="step-card-title">{{ 'ui.installAndroidStudio' | t }}</div>
                               <div class="step-card-desc">
-                                前往 <a href="https://developer.android.com/studio" target="_blank" rel="noopener" class="guide-link">developer.android.com/studio</a> 下载适用于 {{ effectiveOs() === 'darwin' ? 'macOS' : (effectiveOs() === 'windows' ? 'Windows' : 'Linux') }} 的安装包并完成安装。
+                                {{ 'ui.studioDownload' | t }}<a href="https://developer.android.com/studio" target="_blank" rel="noopener" class="guide-link">developer.android.com/studio</a> {{ 'ui.studioDownloadOutro' | t }}
                               </div>
                             </div>
 
@@ -1187,9 +1187,9 @@
                                 <span class="step-number-badge">2</span>
                                 <span class="material-symbols-outlined step-card-icon">developer_mode</span>
                               </div>
-                              <div class="step-card-title">打开设备管理器 (Device Manager)</div>
+                              <div class="step-card-title">{{ 'ui.openDeviceManager' | t }}</div>
                               <div class="step-card-desc">
-                                在 Android Studio 欢迎界面点击 <strong>More Actions &gt; Virtual Device Manager</strong>（或菜单栏 <strong>Tools &gt; Device Manager</strong>）。
+                                {{ 'ui.studioWelcome' | t }}<strong>More Actions &gt; Virtual Device Manager</strong>{{ 'ui.studioMenu' | t }}<strong>Tools &gt; Device Manager</strong>{{ 'ui.studioMenuOutro' | t }}
                               </div>
                             </div>
 
@@ -1198,9 +1198,9 @@
                                 <span class="step-number-badge">3</span>
                                 <span class="material-symbols-outlined step-card-icon">add_circle</span>
                               </div>
-                              <div class="step-card-title">新建虚拟设备</div>
+                              <div class="step-card-title">{{ 'ui.createVirtualDevice' | t }}</div>
                               <div class="step-card-desc">
-                                点击 <strong>Create Device</strong>（新建设备），选择 <strong>Pixel 8</strong> 机型，系统镜像选择 <strong>Android 14 (API 34)</strong>，然后点击 <strong>Finish</strong>（完成）。
+                                {{ 'ui.createDeviceIntro' | t }}<strong>Create Device</strong>{{ 'ui.createDeviceMid' | t }}<strong>Pixel 8</strong>{{ 'ui.createDeviceModel' | t }}<strong>Android 14 (API 34)</strong>{{ 'ui.createDeviceOutro' | t }}<strong>Finish</strong>{{ 'ui.createDeviceFinish' | t }}
                               </div>
                             </div>
 
@@ -1209,9 +1209,9 @@
                                 <span class="step-number-badge">4</span>
                                 <span class="material-symbols-outlined step-card-icon">play_arrow</span>
                               </div>
-                              <div class="step-card-title">启动模拟器</div>
+                              <div class="step-card-title">{{ 'ui.launchEmulator' | t }}</div>
                               <div class="step-card-desc">
-                                在设备管理器中点击 ▶ <strong>Play</strong>（播放）按钮。Artemis 会自动检测并连接该模拟器！
+                                {{ 'ui.avdReady' | t }}
                               </div>
                             </div>
                           </div>
@@ -1231,7 +1231,7 @@
                                   <button type="button" class="btn-copy-code" [class.copied]="copiedId() === 'emu_kvm'"
                                     (click)="copyToClipboard(emuHypervisorCmd(), 'emu_kvm')">
                                     <span class="material-symbols-outlined">{{ copiedId() === 'emu_kvm' ? 'check' : 'content_copy' }}</span>
-                                    <span>{{ copiedId() === 'emu_kvm' ? '已复制!' : '复制' }}</span>
+                                    <span>{{ copiedId() === 'emu_kvm' ? ('ui.emuKvm' | t) : ('ui.copied' | t) }}</span>
                                   </button>
                                 </div>
                               </div>
@@ -1240,15 +1240,15 @@
                             <div class="cli-step-item">
                               <div class="step-badge-num">2</div>
                               <div class="step-content">
-                                <div class="step-title">下载模拟器与系统镜像 (API 34)</div>
-                                <p class="step-text">使用 SDK Manager 安装 Android 14 Google APIs 系统镜像：</p>
+                                <div class="step-title">{{ 'ui.downloadEmulatorSystemImageAPI34' | t }}</div>
+                                <p class="step-text">{{ 'ui.installAndroid14GoogleAPIsSystemImageUsingSDKManager' | t }}</p>
                                 <div class="code-box small-box">
                                   <span class="terminal-prefix">{{ effectiveOs() === 'windows' ? 'PS>' : '$' }}</span>
                                   <code class="code-text">{{ emuSdkInstallCmd() }}</code>
                                   <button type="button" class="btn-copy-code" [class.copied]="copiedId() === 'emu_sdk'"
                                     (click)="copyToClipboard(emuSdkInstallCmd(), 'emu_sdk')">
                                     <span class="material-symbols-outlined">{{ copiedId() === 'emu_sdk' ? 'check' : 'content_copy' }}</span>
-                                    <span>{{ copiedId() === 'emu_sdk' ? '已复制!' : '复制' }}</span>
+                                    <span>{{ copiedId() === 'emu_sdk' ? ('ui.emuSdk' | t) : ('ui.copied' | t) }}</span>
                                   </button>
                                 </div>
                               </div>
@@ -1257,15 +1257,15 @@
                             <div class="cli-step-item">
                               <div class="step-badge-num">3</div>
                               <div class="step-content">
-                                <div class="step-title">新建虚拟设备 (Pixel 8 AVD)</div>
-                                <p class="step-text">初始化一个名为 <code>Pixel_8_API_34</code> 的全新 Android 虚拟设备：</p>
+                                <div class="step-title">{{ 'ui.createVirtualDevicePixel8AVD' | t }}</div>
+                                <p class="step-text">{{ 'ui.createAvdIntro' | t }}<code>Pixel_8_API_34</code>{{ 'ui.createAvdOutro' | t }}</p>
                                 <div class="code-box small-box">
                                   <span class="terminal-prefix">{{ effectiveOs() === 'windows' ? 'PS>' : '$' }}</span>
                                   <code class="code-text">{{ emuCreateAvdCmd() }}</code>
                                   <button type="button" class="btn-copy-code" [class.copied]="copiedId() === 'emu_create'"
                                     (click)="copyToClipboard(emuCreateAvdCmd(), 'emu_create')">
                                     <span class="material-symbols-outlined">{{ copiedId() === 'emu_create' ? 'check' : 'content_copy' }}</span>
-                                    <span>{{ copiedId() === 'emu_create' ? '已复制!' : '复制' }}</span>
+                                    <span>{{ copiedId() === 'emu_create' ? ('ui.emuCreate' | t) : ('ui.copied' | t) }}</span>
                                   </button>
                                 </div>
                               </div>
@@ -1274,15 +1274,15 @@
                             <div class="cli-step-item">
                               <div class="step-badge-num">4</div>
                               <div class="step-content">
-                                <div class="step-title">启动模拟器</div>
-                                <p class="step-text">启动该虚拟设备（如需无窗口静默运行可追加 <code>-no-window</code> 参数）：</p>
+                                <div class="step-title">{{ 'ui.startTheEmulator' | t }}</div>
+                                <p class="step-text">{{ 'ui.runAvdIntro' | t }}<code>-no-window</code>{{ 'ui.runAvdOutro' | t }}</p>
                                 <div class="code-box small-box">
                                   <span class="terminal-prefix">{{ effectiveOs() === 'windows' ? 'PS>' : '$' }}</span>
                                   <code class="code-text">emulator -avd Pixel_8_API_34 -no-boot-anim</code>
                                   <button type="button" class="btn-copy-code" [class.copied]="copiedId() === 'emu_run'"
                                     (click)="copyToClipboard('emulator -avd Pixel_8_API_34 -no-boot-anim', 'emu_run')">
                                     <span class="material-symbols-outlined">{{ copiedId() === 'emu_run' ? 'check' : 'content_copy' }}</span>
-                                    <span>{{ copiedId() === 'emu_run' ? '已复制!' : '复制' }}</span>
+                                    <span>{{ copiedId() === 'emu_run' ? ('ui.emuRun' | t) : ('ui.copied' | t) }}</span>
                                   </button>
                                 </div>
                               </div>
@@ -1300,7 +1300,7 @@
                   <div class="method-details-panel">
                     <div class="usb-guide-intro">
                       <span class="material-symbols-outlined intro-icon">cable</span>
-                      <span>使用 USB 数据线连接 Android 手机并开启开发者选项与 USB 调试：</span>
+                      <span>{{ 'ui.connectYourAndroidPhoneViaUSBCableAndEnableUSBDebugging' | t }}</span>
                     </div>
 
                     <div class="steps-flow-grid">
@@ -1309,8 +1309,8 @@
                           <span class="step-number-badge">1</span>
                           <span class="material-symbols-outlined step-card-icon">usb</span>
                         </div>
-                        <div class="step-card-title">连接 USB 数据线</div>
-                        <div class="step-card-desc">使用支持数据传输的 USB 线将手机连接至电脑。</div>
+                        <div class="step-card-title">{{ 'ui.connectUSBCable' | t }}</div>
+                        <div class="step-card-desc">{{ 'ui.plugYourAndroidPhoneIntoThisComputerWithADataCable' | t }}</div>
                       </div>
 
                       <div class="flow-step-card">
@@ -1318,8 +1318,8 @@
                           <span class="step-number-badge">2</span>
                           <span class="material-symbols-outlined step-card-icon">touch_app</span>
                         </div>
-                        <div class="step-card-title">开启开发者选项</div>
-                        <div class="step-card-desc">进入手机 <strong>设置 > 关于手机</strong>，连续点击 <strong>版本号</strong> 7 次。
+                        <div class="step-card-title">{{ 'ui.enableDeveloperOptions' | t }}</div>
+                        <div class="step-card-desc">{{ 'ui.usbTapBuild' | t }}<strong>{{ 'ui.path.about' | t }}</strong>{{ 'ui.usbTapBuildNum' | t }}<strong>{{ 'ui.buildNumber' | t }}</strong>{{ 'ui.usbTapTimes' | t }}
                           times.</div>
                       </div>
 
@@ -1328,8 +1328,8 @@
                           <span class="step-number-badge">3</span>
                           <span class="material-symbols-outlined step-card-icon">toggle_on</span>
                         </div>
-                        <div class="step-card-title">开启 USB 调试</div>
-                        <div class="step-card-desc">进入 <strong>设置 > 开发者选项</strong>，将 <strong>USB 调试</strong> 开关打开。
+                        <div class="step-card-title">{{ 'ui.enableUSBDebugging' | t }}</div>
+                        <div class="step-card-desc">{{ 'ui.usbOpenDev' | t }}<strong>{{ 'ui.path.developer' | t }}</strong>{{ 'ui.usbTurnOn' | t }}<strong>{{ 'ui.usbDebugging' | t }}</strong>{{ 'ui.usbTurnOnSwitch' | t }}
                         </div>
                       </div>
 
@@ -1338,8 +1338,8 @@
                           <span class="step-number-badge">4</span>
                           <span class="material-symbols-outlined step-card-icon">verified_user</span>
                         </div>
-                        <div class="step-card-title">授权电脑调试</div>
-                        <div class="step-card-desc">在手机弹出的授权提示中勾选 <strong>"始终允许"</strong> 并点击 <strong>允许</strong>。
+                        <div class="step-card-title">{{ 'ui.authorizeComputer' | t }}</div>
+                        <div class="step-card-desc">{{ 'ui.usbAuthorize' | t }}<strong>{{ 'ui.alwaysAllow' | t }}</strong>{{ 'ui.usbAuthorizeMid' | t }}<strong>{{ 'ui.allow' | t }}</strong>{{ 'ui.usbAuthorizeAction' | t }}
                         </div>
                       </div>
                     </div>
@@ -1358,16 +1358,16 @@
                     <div class="wifi-interactive-box">
                       <div class="wifi-form-row">
                         <div class="wifi-input-col ip-col">
-                          <label class="wifi-label">手机 IP 地址</label>
+                          <label class="wifi-label">{{ 'ui.deviceIPAddress' | t }}</label>
                           <div class="wifi-input-wrap">
                             <span class="material-symbols-outlined wrap-icon">router</span>
                             <input type="text" class="wifi-input" [ngModel]="wifiHost()" (ngModelChange)="wifiHost.set($event)"
-                              placeholder="如 192.168.1.108" spellcheck="false" />
+                              [attr.placeholder]="'ui.eG1921681108' | t" spellcheck="false" />
                           </div>
                         </div>
                   
                         <div class="wifi-input-col port-col">
-                          <label class="wifi-label">调试端口</label>
+                          <label class="wifi-label">{{ 'ui.port' | t }}</label>
                           <div class="wifi-input-wrap">
                             <span class="material-symbols-outlined wrap-icon">tag</span>
                             <input type="text" class="wifi-input" [ngModel]="wifiPort()" (ngModelChange)="wifiPort.set($event)"
@@ -1380,10 +1380,10 @@
                             (click)="connectWifiDevice()">
                             @if (isConnectingWifi()) {
                             <span class="material-symbols-outlined spinning">sync</span>
-                            <span>连接中...</span>
+                            <span>{{ 'ui.connecting' | t }}</span>
                             } @else {
                             <span class="material-symbols-outlined">bolt</span>
-                            <span>连接</span>
+                            <span>{{ 'ui.connect' | t }}</span>
                             }
                           </button>
                         </div>
@@ -1405,7 +1405,7 @@
                   <div class="info-callout-box">
                     <span class="material-symbols-outlined callout-icon">help_outline</span>
                     <div class="callout-text">
-                      在手机 <strong>设置 > 开发者选项 > 无线调试</strong> 中查找 IP 地址与端口。
+                      {{ 'ui.ipHint' | t }}
                       </div>
                     </div>
                   </div>
@@ -1416,13 +1416,13 @@
                   <div class="method-details-panel remote-adb-panel">
                     <div class="remote-guide-intro">
                       <span class="material-symbols-outlined intro-icon">hub</span>
-                      <span>输入一台本机可访问的 ADB 服务地址与端口，Artemis 将借助该服务发现并控制连接在另一台电脑上的手机。</span>
+                      <span>{{ 'ui.enterTheHostAndPortOfAnADBServerEndpointThatThisComputerCa' | t }}</span>
                     </div>
 
                     <div class="remote-adb-interactive-box">
                       <div class="remote-adb-form-row">
                         <div class="remote-adb-input-col host-col">
-                          <label class="remote-adb-label" for="remote-adb-host">远程 ADB 服务主机地址 (Host)</label>
+                          <label class="remote-adb-label" for="remote-adb-host">{{ 'ui.adbServerHost' | t }}</label>
                           <div class="remote-adb-input-wrap">
                             <span class="material-symbols-outlined wrap-icon">dns</span>
                             <input
@@ -1439,7 +1439,7 @@
                         </div>
 
                         <div class="remote-adb-input-col port-col">
-                          <label class="remote-adb-label" for="remote-adb-port">远程 ADB 服务端口 (Port)</label>
+                          <label class="remote-adb-label" for="remote-adb-port">{{ 'ui.adbServerPort' | t }}</label>
                           <div class="remote-adb-input-wrap">
                             <span class="material-symbols-outlined wrap-icon">tag</span>
                             <input
@@ -1465,10 +1465,10 @@
                           >
                             @if (isConnectingRemoteAdb()) {
                               <span class="material-symbols-outlined spinning">sync</span>
-                              <span>检查中...</span>
+                              <span>{{ 'ui.checking' | t }}</span>
                             } @else {
                               <span class="material-symbols-outlined">bolt</span>
-                              <span>测试连通性</span>
+                              <span>{{ 'ui.testConnection' | t }}</span>
                             }
                           </button>
                         </div>
@@ -1480,7 +1480,7 @@
                           [ngModel]="rememberRemoteAdb()"
                           (ngModelChange)="rememberRemoteAdb.set($event)"
                         />
-                        <span>记住该 ADB 服务端地址供后续自动连通</span>
+                        <span>{{ 'ui.rememberThisEndpointForFutureArtemisLaunches' | t }}</span>
                       </label>
 
                       @if (remoteAdbMessage()) {
@@ -1506,7 +1506,7 @@
                                 <span>{{ device.serial }}</span>
                               </div>
                               <span class="remote-device-state" [class.ready]="device.state === 'device'">
-                                {{ device.state === 'device' ? '已就绪' : device.state }}
+                                {{ device.state === 'device' ? ('ui.device' | t) : device.state }}
                               </span>
                             </div>
                           }
@@ -1522,17 +1522,17 @@
                         >
                           @if (isActivatingRemoteAdb()) {
                             <span class="material-symbols-outlined spinning">sync</span>
-                            <span>连接中...</span>
+                            <span>{{ 'ui.connecting' | t }}</span>
                           } @else {
                             <span class="material-symbols-outlined">check</span>
-                            <span>{{ remoteAdbHasReadyDevice() ? '使用此连接' : '强制使用' }}</span>
+                            <span>{{ remoteAdbHasReadyDevice() ? ('ui.useConnection' | t) : ('ui.useAnyway' | t) }}</span>
                           }
                         </button>
                       }
                     </div>
 
                     <p class="remote-adb-explanation">
-                      Artemis 会将所有 ADB 指令发送至该远程服务，而非默认的本地服务。该服务可见的任何手机都可被 Artemis 直接调用。
+                      {{ 'ui.adbTargetWarning' | t }}
                     </p>
                   </div>
                 }
@@ -1547,7 +1547,7 @@
                   <span class="material-symbols-outlined alert-icon">lock</span>
                   <div class="locked-details">
                     <div class="locked-title">
-                      {{ adbProbe()?.summary === 'Device Locked' ? '手机处于锁屏状态' : '无法确认锁屏状态' }}
+                      {{ adbProbe()?.summary === 'Device Locked' ? ('ui.deviceLocked' | t) : ('ui.deviceIsLocked' | t) }}
                     </div>
                     <div class="locked-desc">
                       {{ adbProbe()?.description }}
@@ -1555,14 +1555,14 @@
                   </div>
                   <button type="button" class="btn-check-unlock" [disabled]="isRefreshingDiagnostics()" (click)="refreshReadiness()">
                     <span class="material-symbols-outlined" [class.spinning]="isRefreshingDiagnostics()">refresh</span>
-                    <span>{{ isRefreshingDiagnostics() ? '检查中...' : '重新检测' }}</span>
+                    <span>{{ isRefreshingDiagnostics() ? ('ui.checking' | t) : ('ui.checkAgain' | t) }}</span>
                   </button>
                 </div>
 
                 <!-- Multi-Device Switcher if multiple devices detected -->
                 @if (connectedDevices().length > 1) {
                   <div class="multi-device-switcher" style="margin-top: 12px;">
-                    <span class="switcher-label">选择当前操控设备：</span>
+                    <span class="switcher-label">{{ 'ui.selectActiveDevice' | t }}</span>
                     <div class="switcher-chips">
                       @for (dev of connectedDevices(); track dev.serial) {
                         <button
@@ -1592,14 +1592,14 @@
                 <div class="unauthorized-card">
                   <span class="material-symbols-outlined alert-icon">screen_lock_portrait</span>
                   <div class="unauth-details">
-                    <div class="unauth-title">等待手机端授权 USB 调试</div>
+                    <div class="unauth-title">{{ 'ui.usbDebuggingAuthorizationPending' | t }}</div>
                     <div class="unauth-desc">
-                      已检测到 Android 设备，但尚未授权调试。请点亮手机屏幕并在弹出的窗口中勾选 <strong>"始终允许"</strong> 并点击 <strong>允许</strong>。
+                      {{ 'ui.usbAuthPrompt' | t }}<strong>{{ 'ui.allowUSBDebugging' | t }}</strong>{{ 'ui.usbAuthorizeMid' | t }}<strong>{{ 'ui.text4' | t }}</strong>{{ 'ui.usbAuthorizeAction' | t }}
                     </div>
                   </div>
                   <button type="button" class="btn-retry-auth" (click)="restartAdbServer()">
                     <span class="material-symbols-outlined">refresh</span>
-                    <span>{{ isRemoteAdbServer() ? '刷新设备列表' : '重启 ADB 并重新检测' }}</span>
+                    <span>{{ isRemoteAdbServer() ? ('ui.refreshDevices' | t) : ('ui.restartADBCheck' | t) }}</span>
                   </button>
                 </div>
               </div>
@@ -1611,16 +1611,16 @@
                 <div class="error-msg-box">
                   <span class="material-symbols-outlined err-icon">error</span>
                   <div>
-                    <strong>未检测到 Android 调试桥工具 (adb)。</strong> 请根据您的操作系统执行以下命令安装 ADB：
+                    <strong>{{ 'ui.androidPlatformToolsAdbNotFound' | t }}</strong> {{ 'ui.adbInstallHint' | t }}
                   </div>
                 </div>
 
                 <div class="install-commands-row">
                   <div class="install-card" [class.highlight-os]="effectiveOs() === 'linux'">
                     <div class="install-os">
-                      <span>Linux (Ubuntu / Debian 系列)</span>
+                      <span>{{ 'ui.linuxUbuntuDebian' | t }}</span>
                       @if (effectiveOs() === 'linux') {
-                      <span class="detected-badge">当前系统</span>
+                      <span class="detected-badge">{{ 'ui.detected' | t }}</span>
                       }
                     </div>
                     <div class="code-box small-box">
@@ -1629,16 +1629,16 @@
                       <button type="button" class="btn-copy-code" [class.copied]="copiedId() === 'linux_adb'"
                         (click)="copyToClipboard('sudo apt-get install -y adb', 'linux_adb')">
                         <span class="material-symbols-outlined">{{ copiedId() === 'linux_adb' ? 'check' : 'content_copy' }}</span>
-                        <span>{{ copiedId() === 'linux_adb' ? '已复制!' : '复制' }}</span>
+                        <span>{{ copiedId() === 'linux_adb' ? ('ui.linuxAdb' | t) : ('ui.copied' | t) }}</span>
                       </button>
                     </div>
                   </div>
 
                   <div class="install-card" [class.highlight-os]="effectiveOs() === 'darwin'">
                     <div class="install-os">
-                      <span>macOS (Homebrew 包管理)</span>
+                      <span>{{ 'ui.macosHomebrew' | t }}</span>
                       @if (effectiveOs() === 'darwin') {
-                      <span class="detected-badge">当前系统</span>
+                      <span class="detected-badge">{{ 'ui.detected' | t }}</span>
                       }
                     </div>
                     <div class="code-box small-box">
@@ -1647,16 +1647,16 @@
                       <button type="button" class="btn-copy-code" [class.copied]="copiedId() === 'mac_adb'"
                         (click)="copyToClipboard('brew install android-platform-tools', 'mac_adb')">
                         <span class="material-symbols-outlined">{{ copiedId() === 'mac_adb' ? 'check' : 'content_copy' }}</span>
-                        <span>{{ copiedId() === 'mac_adb' ? '已复制!' : '复制' }}</span>
+                        <span>{{ copiedId() === 'mac_adb' ? ('ui.macAdb' | t) : ('ui.copied' | t) }}</span>
                       </button>
                     </div>
                   </div>
 
                   <div class="install-card" [class.highlight-os]="effectiveOs() === 'windows'">
                     <div class="install-os">
-                      <span>Windows (WinGet 包管理)</span>
+                      <span>{{ 'ui.windowsWinGet' | t }}</span>
                       @if (effectiveOs() === 'windows') {
-                      <span class="detected-badge">当前系统</span>
+                      <span class="detected-badge">{{ 'ui.detected' | t }}</span>
                       }
                     </div>
                     <div class="code-box small-box">
@@ -1665,7 +1665,7 @@
                       <button type="button" class="btn-copy-code" [class.copied]="copiedId() === 'win_adb'"
                         (click)="copyToClipboard('winget install Google.PlatformTools', 'win_adb')">
                         <span class="material-symbols-outlined">{{ copiedId() === 'win_adb' ? 'check' : 'content_copy' }}</span>
-                        <span>{{ copiedId() === 'win_adb' ? '已复制!' : '复制' }}</span>
+                        <span>{{ copiedId() === 'win_adb' ? ('ui.winAdb' | t) : ('ui.copied' | t) }}</span>
                       </button>
                     </div>
                   </div>
@@ -1684,12 +1684,12 @@
                 <span class="material-symbols-outlined step-check-icon">check</span>
               </div>
               <div class="ready-text-group">
-                <h4 class="ready-title">系统与真机环境已完全就绪</h4>
-                <p class="ready-desc">所有工具链依赖、大模型配置与 Android 设备均已通过体检，可立即下发自动化任务。</p>
+                <h4 class="ready-title">{{ 'ui.systemReadyForAutonomousTasks' | t }}</h4>
+                <p class="ready-desc">{{ 'ui.allDependenciesAIModelCredentialsAndAndroidDeviceAreVerifi' | t }}</p>
               </div>
             </div>
             <button type="button" class="btn-proceed-launch" (click)="setTab('launcher')">
-              <span>进入任务工作台</span>
+              <span>{{ 'ui.launchAutonomousTask' | t }}</span>
               <span class="material-symbols-outlined rocket-icon">rocket_launch</span>
             </button>
           </div>
@@ -1710,8 +1710,8 @@
             <span class="material-symbols-outlined warn-icon">{{ adbProbe()?.summary === 'Device Locked' ? 'lock' : 'warning' }}</span>
             <span>
               {{ adbProbe()?.summary === 'Device Locked'
-                ? 'Android 设备处于锁屏状态，请先解锁并进入桌面后再下发任务。'
-                : '环境依赖未完全就绪：请先配置大模型密钥或连接真机。点击此处打开准备向导。' }}
+                ? ('ui.androidDeviceIsLockedUnlockItAndEnterTheHomeScreenBeforeRu' | t)
+                : ('ui.prerequisitesIncompleteRuntimeCredentialsOrAndroidDeviceIs' | t) }}
             </span>
             <span class="material-symbols-outlined arrow">arrow_forward</span>
           </div>
@@ -1726,11 +1726,11 @@
               <div class="suggestion-left">
                 <span class="material-symbols-outlined sparkle-icon">auto_awesome</span>
                 <span class="suggestion-text">
-                  检测到长时间连续监控或复杂长流程任务，推荐使用：<strong>Pro 认知规划模式</strong>
+                  {{ 'ui.proRecommended' | t }}<strong>{{ 'ui.proMode' | t }}</strong>
                 </span>
               </div>
               <button type="button" class="btn-switch-pro" (click)="setProfile('pro')">
-                <span>切换至 Pro 模式</span>
+                <span>{{ 'ui.switchToPro' | t }}</span>
                 <span class="material-symbols-outlined btn-arrow">arrow_forward</span>
               </button>
             </div>
@@ -1744,7 +1744,7 @@
               rows="3"
               [(ngModel)]="taskGoal"
               [disabled]="isSubmitting()"
-              placeholder="请输入想在手机上执行的目标（例如：打开微信给文件传输助手发消息、在闲鱼发布最新商品实拍草稿...）"
+              [attr.placeholder]="'ui.describeWhatYouWantToAchieveOnYourPhoneEGOpenGmailAndSearc' | t"
               (keydown.control.enter)="runTask()"
               (keydown.meta.enter)="runTask()"
             ></textarea>
@@ -1791,7 +1791,7 @@
                   class="model-toggle-btn btn-flash"
                   [class.active]="selectedProfile() === 'flash'"
                   (click)="setProfile('flash')"
-                  title="Flash 模式：单模型实时响应式执行，适用于日常 App 自动化任务 (3–5 秒/步)"
+                  [title]="'ui.flashFastSingleLookLoopForEverydayAppTasks35sStep' | t"
                 >
                   <span class="material-symbols-outlined btn-icon">bolt</span>
                   <span class="btn-text">Flash</span>
@@ -1801,7 +1801,7 @@
                   class="model-toggle-btn btn-pro"
                   [class.active]="selectedProfile() === 'pro'"
                   (click)="setProfile('pro')"
-                  title="Pro 模式：先规划、后校验，被拦截动作可自愈恢复，适用于长流程复杂任务 (15–40 秒/步)"
+                  [title]="'ui.proPlansFirstChecksResultsAndRecoversFromBlockedStepsForLo' | t"
                 >
                   <span class="material-symbols-outlined btn-icon">psychology</span>
                   <span class="btn-text">Pro</span>
@@ -1820,25 +1820,25 @@
                 class="btn-run-composer"
                 [class.btn-run-pro]="selectedProfile() === 'pro'"
                 [disabled]="!taskGoal().trim() || isSubmitting() || !isReady()"
-                [title]="!isReady() ? (adbProbe()?.summary === 'Device Locked' ? '请先解锁 Android 设备再执行任务' : '请先完成系统环境配置再执行任务') : '执行任务'"
+                [title]="!isReady() ? (adbProbe()?.summary === 'Device Locked' ? ('ui.deviceLocked' | t) : ('ui.unlockTheAndroidDeviceBeforeRunning' | t)) : ('ui.completeSystemSetupBeforeRunning' | t)"
                 (click)="runTask()"
               >
                 @if (isSubmitting()) {
                   <span class="spinner"></span><span>Starting...</span>
                 } @else {
-                  <span class="material-symbols-outlined run-icon">play_arrow</span><span>立即执行任务</span>
+                  <span class="material-symbols-outlined run-icon">play_arrow</span><span>{{ 'ui.playArrow' | t }}</span>
                 }
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Pro Mode Standalone 预期结构化输出 Card (Clean & Minimalist) -->
+        <!-- Pro Mode Standalone expected-output card -->
         @if (selectedProfile() === 'pro') {
           <div class="pro-outputter-standalone-card">
             <div class="outputter-card-header">
-              <span class="outputter-title">预期结构化输出</span>
-              <span class="outputter-optional-tag">(选填)</span>
+              <span class="outputter-title">{{ 'ui.expectedOutput' | t }}</span>
+              <span class="outputter-optional-tag">{{ 'ui.optional' | t }}</span>
             </div>
 
             <div class="outputter-input-wrapper">
@@ -1847,7 +1847,7 @@
                 class="outputter-standalone-input"
                 [ngModel]="expectedOutput()"
                 (ngModelChange)="expectedOutput.set($event)"
-                placeholder="指定希望从界面提取的结构化结果（例如：'以JSON格式提取短信验证码' 或 '总结商品优惠信息与总价'）..."
+                [attr.placeholder]="'ui.specifyExpectedOutputOrSchemaEGExtractSMSVerificationCodeA' | t"
                 spellcheck="false"
               />
               @if (expectedOutput().trim()) {
@@ -1855,7 +1855,7 @@
                   type="button"
                   class="btn-clear-standalone"
                   (click)="expectedOutput.set('')"
-                  title="清空预期输出内容"
+                  [title]="'ui.clearExpectedOutput' | t"
                 >
                   <span class="material-symbols-outlined">close</span>
                 </button>
@@ -1866,9 +1866,9 @@
           <!-- Pro Mode Tuning Card: verification depth & explorer perception sliders -->
           <div class="pro-tuning-card" [class.tip-open]="activeTuningTip() !== null">
             <div class="tuning-card-header">
-              <span class="tuning-title">Pro 深度参数微调</span>
+              <span class="tuning-title">{{ 'ui.proSettings' | t }}</span>
               @if (!isTuningDefault()) {
-                <button type="button" class="btn-tuning-reset" (click)="resetTuning()" title="恢复默认参数">Reset</button>
+                <button type="button" class="btn-tuning-reset" (click)="resetTuning()" [title]="'ui.backToTheDefaults' | t">Reset</button>
               }
             </div>
 
@@ -1978,14 +1978,14 @@
           </div>
         }
 
-        <!-- 推荐高频任务库 Hub (Clean & Direct) -->
+        <!-- Recommended task library hub -->
         <div class="smart-suggestions-container">
           <!-- Header Bar: Clean Category Tabs & Shuffle -->
           <div class="suggestions-header-bar">
             <div class="header-left">
               <div class="section-label">
                 <span class="material-symbols-outlined section-icon">auto_awesome</span>
-                <span class="label-text">推荐高频任务库</span>
+                <span class="label-text">{{ 'ui.recommendedTasks' | t }}</span>
               </div>
 
               <!-- Filter Tabs -->
@@ -1996,7 +1996,7 @@
                   [class.active]="selectedCategory() === 'all'"
                   (click)="setCategory('all')"
                 >
-                  <span>全部</span>
+                  <span>{{ 'ui.all' | t }}</span>
                 </button>
 
                 <button
@@ -2026,7 +2026,7 @@
                   (click)="setCategory('cross_app')"
                 >
                   <span class="material-symbols-outlined tab-mini-icon">sync_alt</span>
-                  <span>多应用协同</span>
+                  <span>{{ 'ui.multiApp' | t }}</span>
                 </button>
 
                 <button
@@ -2036,15 +2036,15 @@
                   (click)="setCategory('monitor')"
                 >
                   <span class="material-symbols-outlined tab-mini-icon">monitoring</span>
-                  <span>状态监控</span>
+                  <span>{{ 'ui.monitor' | t }}</span>
                 </button>
               </div>
             </div>
 
             <div class="header-right">
-              <button type="button" class="btn-shuffle-suggestions" (click)="shuffleSuggestions()" title="换一批推荐任务">
+              <button type="button" class="btn-shuffle-suggestions" (click)="shuffleSuggestions()" [title]="'ui.discoverMoreTasks' | t">
                 <span class="material-symbols-outlined shuffle-icon">shuffle</span>
-                <span>换一批</span>
+                <span>{{ 'ui.shuffle' | t }}</span>
               </button>
             </div>
           </div>
@@ -2085,7 +2085,7 @@
                 <div class="card-footer-row">
                   <span class="tag-pill">{{ item.tagKey | t }}</span>
                   <div class="use-prompt-action">
-                    <span>填入任务</span>
+                    <span>{{ 'ui.use' | t }}</span>
                     <span class="material-symbols-outlined action-arrow">arrow_forward</span>
                   </div>
                 </div>
