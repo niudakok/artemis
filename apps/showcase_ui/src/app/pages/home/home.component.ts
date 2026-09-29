@@ -26,7 +26,8 @@ import {
   AdbServerConnectionResult,
   AdbServerDevice,
   DeviceInfo,
-  ProbeResult
+  ProbeResult,
+  ProbeStatus
 } from '../../core/models/system.model';
 import {
   AppReference,
@@ -102,6 +103,18 @@ export interface TuningSliderVm {
 export type { AppReference, SmartSuggestion, SuggestionCategory };
 
 type AdbGuideTab = 'emulator' | 'usb' | 'wifi' | 'remote';
+
+/**
+ * Localised subtitle keys per environment probe, keyed on the stable probe id
+ * then the status. The backend `summary` literal is replaced by these keys so
+ * the cards read in the active language instead of English data.
+ */
+const PROBE_SUMMARY_KEYS: Record<string, Partial<Record<ProbeStatus, string>>> = {
+  system_config: { pass: 'ui.probe.summary.configValid' },
+  toolchain: { pass: 'ui.probe.summary.toolchainReady' },
+  gemini_api_key: { fail: 'ui.probe.summary.keyMissing' },
+  vision_ocr_key: { pass: 'ui.probe.summary.ocrNotConfigured' },
+};
 
 
 @Component({
@@ -369,6 +382,67 @@ export class HomeComponent implements OnInit, OnDestroy {
   public geminiProbe = computed(() => this.systemService.geminiProbe());
   public ocrProbe = computed(() => this.systemService.ocrProbe());
   public toolchainProbe = computed(() => this.systemService.toolchainProbe());
+
+  /**
+   * Stable code describing the local ADB device state.
+   *
+   * The backend exposes this only as a human-facing English `summary` (e.g.
+   * "Device Booting"). The template previously branched on those literal
+   * strings, which would break once `summary` is localised. Map it once to a
+   * stable code here and branch on the code instead.
+   */
+  public adbState(): 'booting' | 'locked' | 'lockUnknown' | 'unauthorized' | 'none' {
+    const s = this.adbProbe()?.summary ?? '';
+    if (s === 'Device Booting') return 'booting';
+    if (s === 'Device Locked') return 'locked';
+    if (s === 'Lock State Unknown') return 'lockUnknown';
+    if (s === 'Device Unauthorized') return 'unauthorized';
+    return 'none';
+  }
+
+  /** Localised card subtitle for an environment probe, keyed on stable id. */
+  public probeSummaryLabel(probe: ProbeResult | null): string {
+    if (!probe) return this.i18n.t('ui.checking2');
+    if (probe.status === 'fail' && probe.id !== 'android_adb') {
+      const failKey = PROBE_SUMMARY_KEYS[probe.id]?.fail;
+      if (failKey) return this.i18n.t(failKey);
+    }
+    if (probe.id === 'python_runtime') {
+      if (probe.status === 'pass') {
+        const version = probe.metadata?.['version'];
+        return this.i18n.t('ui.probe.summary.pythonReady', {
+          version: typeof version === 'string' && version ? version : '',
+        });
+      }
+      return probe.summary || this.i18n.t('ui.checking2');
+    }
+    if (probe.id === 'android_adb') {
+      const stateKey: Record<string, string> = {
+        locking: 'ui.probe.summary.deviceLocked',
+        lockUnknown: 'ui.probe.summary.lockStateUnknown',
+        unauthorized: 'ui.probe.summary.deviceUnauthorized',
+        booting: 'ui.probe.summary.deviceBooting',
+      };
+      return this.i18n.t(stateKey[this.adbState()] ?? 'ui.probe.summary.deviceLocked');
+    }
+    const passKey = PROBE_SUMMARY_KEYS[probe.id]?.pass;
+    if (passKey) return this.i18n.t(passKey);
+    return probe.summary || this.i18n.t('ui.checking2');
+  }
+
+  /**
+   * Localised device-state description. The full backend description is long
+   * and carries dynamic paths/serials, so the localised text is a stable
+   * sentence that still tells the user about the lock state.
+   */
+  public adbDescription(): string {
+    const state = this.adbState();
+    if (state === 'locked') return this.i18n.t('ui.probe.desc.deviceLocked');
+    if (state === 'lockUnknown') return this.i18n.t('ui.probe.desc.lockStateUnknown');
+    if (state === 'unauthorized') return this.i18n.t('ui.probe.desc.deviceUnauthorized');
+    if (state === 'booting') return this.i18n.t('ui.probe.desc.deviceBooting');
+    return this.adbProbe()?.description ?? '';
+  }
 
   // Step-level readiness
   public isEnvironmentReady = computed(() => this.systemService.isEnvironmentReady());

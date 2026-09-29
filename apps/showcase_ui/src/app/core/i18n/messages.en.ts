@@ -967,4 +967,19 @@ export const EN_MESSAGES: Messages = {
   'stream.status.completed': 'Completed',
 
   // ----------------------------------- home console: mode blurbs --
+
+  // ----------------------- home console: environment probe copy --
+  'ui.probe.desc.deviceBooting': 'The emulator is still booting. Please wait for it to reach the home screen.',
+  'ui.probe.desc.deviceLocked': 'An Android device is connected, but the lock screen is active. Unlock the device and reach the home screen before running a task.',
+  'ui.probe.desc.deviceUnauthorized': 'The device needs to be authorised for USB debugging. Tap Allow on the phone and check again.',
+  'ui.probe.desc.lockStateUnknown': 'Device is connected, but its lock state could not be determined. Unlock and reach the home screen before running a task.',
+  'ui.probe.summary.configValid': 'Config valid',
+  'ui.probe.summary.deviceBooting': 'Device booting',
+  'ui.probe.summary.deviceLocked': 'Device locked',
+  'ui.probe.summary.deviceUnauthorized': 'Device not authorized',
+  'ui.probe.summary.keyMissing': 'Key missing',
+  'ui.probe.summary.lockStateUnknown': 'Lock state unknown',
+  'ui.probe.summary.ocrNotConfigured': 'Not configured (optional)',
+  'ui.probe.summary.pythonReady': 'Python {version} ready',
+  'ui.probe.summary.toolchainReady': 'Ready (FFmpeg + scrcpy)',
 };
