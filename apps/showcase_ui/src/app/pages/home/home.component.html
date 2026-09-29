@@ -787,7 +787,7 @@
                       <div class="tracker-titles">
                         <div class="tracker-main-heading">
                           <h4 class="tracker-title">
-                            Launching Android Emulator: <span class="avd-highlight">{{ emulatorLaunchState()?.avd_name || activeDevice()?.serial || ('ui.virtualDevice' | t) }}</span>
+                            {{ 'home.emulator.launching' | t }} <span class="avd-highlight">{{ emulatorLaunchState()?.avd_name || activeDevice()?.serial || ('ui.virtualDevice' | t) }}</span>
                           </h4>
                           <span class="stage-tag-badge">{{ emulatorLaunchState()?.status === 'booting' ? ('ui.booting' | t) : ('ui.osBooting' | t) }}</span>
                         </div>
@@ -1017,7 +1017,7 @@
                       </div>
                       <div class="method-info">
                         <div class="method-title-row">
-                          <span class="method-title">Wireless ADB</span>
+                          <span class="method-title">{{ 'home.adb.wireless' | t }}</span>
                         </div>
                         <span class="method-desc">{{ 'ui.connectOverLocalWiFi' | t }}</span>
                       </div>
@@ -1039,7 +1039,7 @@
                       </div>
                       <div class="method-info">
                         <div class="method-title-row">
-                          <span class="method-title">Remote Computer</span>
+                          <span class="method-title">{{ 'home.adb.remote' | t }}</span>
                         </div>
                         <span class="method-desc">{{ 'ui.phoneConnectedToAnotherComputer' | t }}</span>
                       </div>
@@ -1351,7 +1351,7 @@
                   <div class="method-details-panel">
                     <div class="wifi-guide-intro">
                       <span class="material-symbols-outlined intro-icon">wifi</span>
-                      <span>Connect your phone and computer on the same Wi-Fi network:</span>
+                      <span>{{ 'home.wifi.sameNetwork' | t }}</span>
                     </div>
                   
                     <!-- Interactive Wi-Fi Connection Generator Box -->
@@ -1576,7 +1576,7 @@
                           </span>
                           <span>{{ dev.model || dev.serial }}</span>
                           @if (dev.serial === activeDevice()?.serial) {
-                            <span class="active-check">✓ Active</span>
+                            <span class="active-check">{{ 'home.usb.active' | t }}</span>
                           }
                         </button>
                       }
@@ -1760,14 +1760,14 @@
                 <p class="desc-line">
                   <span class="mode-name">Flash</span>
                   <span class="bullet">·</span>
-                  <span>Token-efficient, rapid <strong>3–5s/step</strong> decisions straight from the live screen. Best for everyday tasks with a clear path, however long they run.</span>
-                  <span class="limitation-tag">(No plan, no result check, no ADB commands)</span>
+                  <span>{{ 'mode.flash.claim' | t }} <strong>3–5s/step</strong> {{ 'mode.flash.detail' | t }}</span>
+                  <span class="limitation-tag">{{ 'mode.flash.excludes' | t }}</span>
                 </p>
               } @else {
                 <p class="desc-line">
                   <span class="mode-name">Pro</span>
                   <span class="bullet">·</span>
-                  <span>Plans first, checks its results and recovers when a tap is blocked. Handles <strong>100+ step</strong> workflows and live phone monitoring (<strong>15–40s</strong> / step).</span>
+                  <span>{{ 'mode.pro.claim' | t }} <strong>100+ step</strong> {{ 'mode.pro.steps' | t }}<strong>{{ 'mode.pro.speed' | t }}</strong> / step).</span>
                 </p>
               }
             </div>
@@ -1824,7 +1824,7 @@
                 (click)="runTask()"
               >
                 @if (isSubmitting()) {
-                  <span class="spinner"></span><span>Starting...</span>
+                  <span class="spinner"></span><span>{{ 'run.starting' | t }}</span>
                 } @else {
                   <span class="material-symbols-outlined run-icon">play_arrow</span><span>{{ 'ui.playArrow' | t }}</span>
                 }
@@ -1868,7 +1868,7 @@
             <div class="tuning-card-header">
               <span class="tuning-title">{{ 'ui.proSettings' | t }}</span>
               @if (!isTuningDefault()) {
-                <button type="button" class="btn-tuning-reset" (click)="resetTuning()" [title]="'ui.backToTheDefaults' | t">Reset</button>
+                <button type="button" class="btn-tuning-reset" (click)="resetTuning()" [title]="'ui.backToTheDefaults' | t">{{ 'run.reset' | t }}</button>
               }
             </div>
 

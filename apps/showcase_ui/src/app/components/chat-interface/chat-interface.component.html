@@ -25,7 +25,7 @@ limitations under the License.
         (click)="agentService.activeTab.set('tasks')"
         >
         <span class="material-symbols-outlined tab-icon">list_alt</span>
-        <span class="tab-text">Task Queue</span>
+        <span class="tab-text">{{ 'chat.tab.taskQueue' | t }}</span>
       </button>
       <button
         class="tab-selector-btn"
@@ -33,7 +33,7 @@ limitations under the License.
         (click)="agentService.activeTab.set('notes')"
         >
         <span class="material-symbols-outlined tab-icon">description</span>
-        <span class="tab-text">Notes & Plans</span>
+        <span class="tab-text">{{ 'chat.tab.notesPlans' | t }}</span>
       </button>
     </div>
 
@@ -212,7 +212,7 @@ limitations under the License.
             <div class="empty-notes-icon">
               <span class="material-symbols-outlined">description</span>
             </div>
-            <h4 class="empty-notes-title">No Notes & Plans</h4>
+            <h4 class="empty-notes-title">{{ 'chat.notes.empty' | t }}</h4>
             <p class="empty-notes-subtitle">{{ 'chat.notes.empty' | t }}</p>
           </div>
         }

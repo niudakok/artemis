@@ -106,7 +106,7 @@ limitations under the License.
                 class="live-screen-img"
                 [src]="liveStreamUrl()"
                 (error)="onLiveStreamError()"
-                alt="Live Device Screen"
+                [alt]="'player.title.live' | t"
                 />
                 <div class="live-status-overlay">
                   <div class="live-badge">
@@ -220,7 +220,7 @@ limitations under the License.
                                 (click)="setStepViewMode('pre', $event)"
                                 [title]="'player.beforeAction' | t"
                                 >
-                                Pre
+                                {{ 'player.step.pre' | t }}
                               </button>
                               <button
                                 class="toggle-btn"
@@ -228,7 +228,7 @@ limitations under the License.
                                 (click)="setStepViewMode('post', $event)"
                                 [title]="'player.afterAction' | t"
                                 >
-                                Post
+                                {{ 'player.step.post' | t }}
                               </button>
                             </div>
                           }
@@ -283,11 +283,11 @@ limitations under the License.
                             <span class="material-symbols-outlined">{{ isStepPlaying() ? 'pause' : 'play_arrow' }}</span>
                           </button>
                           <!-- Previous Frame Button -->
-                          <button class="ctrl-btn" (click)="prevStepFrame()" [disabled]="activeStepIndex() <= 0" title="Previous Step">
+                          <button class="ctrl-btn" (click)="prevStepFrame()" [disabled]="activeStepIndex() <= 0" [title]="'player.step.previous' | t">
                             <span class="material-symbols-outlined">skip_previous</span>
                           </button>
                           <!-- Next Frame Button -->
-                          <button class="ctrl-btn" (click)="nextStepFrame()" [disabled]="activeStepIndex() >= totalStepFrames() - 1" title="Next Step">
+                          <button class="ctrl-btn" (click)="nextStepFrame()" [disabled]="activeStepIndex() >= totalStepFrames() - 1" [title]="'player.step.next' | t">
                             <span class="material-symbols-outlined">skip_next</span>
                           </button>
                           <!-- Step Replay / Reset -->
@@ -421,7 +421,7 @@ limitations under the License.
                       </p>
                       @if (agentService.recordingPlaybackStatus() === 'failed' || videoLoadError()) {
                         <button class="retry-btn" (click)="videoLoadError.set(false); agentService.retryVideoRecording()">
-                          <span class="material-symbols-outlined">refresh</span> Retry
+                          <span class="material-symbols-outlined">refresh</span> {{ 'player.retry' | t }}
                         </button>
                       }
                     </div>
