@@ -22,11 +22,14 @@ import { TranslateParams } from './types';
 /**
  * Resolves a message key in the active locale: `{{ 'nav.home' | t }}`.
  *
- * Stays a pure pipe on purpose. `I18nService.t` reads a signal, so Angular's
- * signal graph re-runs the pipe when the locale changes — no `pure: false`, and
- * no change-detection cost on renders that did not switch language.
+ * Deliberately an *impure* (`pure: false`) pipe. A pure pipe is only re-run when
+ * its *input* changes, and most keys are string literals — so switching language
+ * would leave text stale (the transform would never re-run). Impure makes the
+ * signal read inside `transform` a tracked template dependency, so Angular
+ * schedules change detection and re-evaluates the pipe whenever the locale
+ * signal changes.
  */
-@Pipe({ name: 't' })
+@Pipe({ name: 't', pure: false })
 export class TranslatePipe implements PipeTransform {
   private readonly i18n = inject(I18nService);
 
