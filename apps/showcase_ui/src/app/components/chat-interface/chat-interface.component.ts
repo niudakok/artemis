@@ -16,6 +16,8 @@
 
 import { Component, ChangeDetectionStrategy, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { t } from '../../core/i18n/runtime';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { FormsModule } from '@angular/forms';
 import { AgentService } from '../../services/agent.service';
 import { Session } from '../../core/models/session.model';
@@ -27,7 +29,7 @@ export type { MarkdownSegment, MarkdownLine, NoteMilestone, ParsedNote };
 @Component({
   selector: 'app-chat-interface',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './chat-interface.component.html',
   styleUrl: './chat-interface.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -95,7 +97,7 @@ export class ChatInterfaceComponent {
       error: (err) => {
         console.error('Failed to submit task:', err);
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.error?.detail || '执行器正忙，请等待当前任务完成后再下发新指令。');
+        this.errorMessage.set(err.error?.detail || t('workspace.runnerBusy'));
         // Auto-dismiss error banner after 5 seconds
         setTimeout(() => {
           this.errorMessage.set(null);
@@ -133,7 +135,7 @@ export class ChatInterfaceComponent {
    * Clear all database data/history to start fresh
    */
   public clearHistory(): void {
-    if (!confirm('确定要清空所有任务与历史执行记录吗？此操作不可撤销。')) {
+    if (!confirm(t('chat.confirm.clear'))) {
       return;
     }
     this.isSubmitting.set(true);
@@ -145,7 +147,7 @@ export class ChatInterfaceComponent {
       error: (err: any) => {
         console.error('Failed to clear history:', err);
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.error?.detail || '清空历史执行记录失败。');
+        this.errorMessage.set(err.error?.detail || t('chat.error.clear'));
       }
     });
   }
@@ -155,7 +157,7 @@ export class ChatInterfaceComponent {
    */
   public deleteTask(sessionId: string, event: MouseEvent): void {
     event.stopPropagation();
-    if (!confirm(`确定要删除该任务吗？此操作不可撤销。`)) {
+    if (!confirm(t('chat.confirm.delete'))) {
       return;
     }
     this.isSubmitting.set(true);
@@ -167,7 +169,7 @@ export class ChatInterfaceComponent {
       error: (err: any) => {
         console.error(`Failed to delete task ${sessionId}:`, err);
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.error?.detail || '删除任务失败。');
+        this.errorMessage.set(err.error?.detail || t('chat.error.delete'));
       }
     });
   }
@@ -175,8 +177,7 @@ export class ChatInterfaceComponent {
   /**
    * Determine the current task execution status
    */
-  public getTaskStatus(session: Session): 'running' | 'paused' | 'completed' | 'pending' | 'failed' | 'cancelled' {
-    if (session.status) {
+  public getTaskStatus(session: Session): 'running' | 'paused' | 'completed' | 'pending' | 'failed' | 'cancelled' {    if (session.status) {
       const s = session.status.toLowerCase();
       if (s === 'completed' || s === 'success' || s === 'failed' || s === 'cancelled') {
         return (s === 'success' ? 'completed' : s) as any;
@@ -189,6 +190,40 @@ export class ChatInterfaceComponent {
       return this.agentService.agentStatus() as 'running' | 'paused';
     }
     return 'completed';
+  }
+
+  /**
+   * Localised task status.
+   *
+   * Upstream rendered the raw status through `| uppercase`; the localisation
+   * replaced that with a hard-coded Chinese ternary. Mapping to a message key
+   * keeps both locales readable and leaves unknown statuses untouched.
+   */
+  public taskStatusLabel(status: string | null | undefined): string {
+    const s = String(status ?? '');
+    switch (s) {
+      case 'running':
+        return t('chat.status.running');
+      case 'paused':
+        return t('chat.status.paused');
+      case 'completed':
+        return t('chat.status.completed');
+      case 'failed':
+        return t('chat.status.failed');
+      case 'cancelled':
+        return t('chat.status.cancelled');
+      default:
+        return s;
+    }
+  }
+
+  /** Section headers count their rows, so they are assembled in code. */
+  public activeQueueLabel(): string {
+    return t('chat.queue.active', { count: this.activeQueue().length });
+  }
+
+  public historyTitleLabel(): string {
+    return t('chat.history.title', { count: this.historyTasks().length });
   }
 
   /**

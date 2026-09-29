@@ -23,11 +23,12 @@ import {
   computed,
   ElementRef,
   ViewChild,
-  HostListener,
-  effect,
+  HostListener,  effect,
   OnDestroy
 } from '@angular/core';
 
+import { t } from '../../core/i18n/runtime';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { FormsModule } from '@angular/forms';
 import { AgentService } from '../../services/agent.service';
 import { StepReplayFrame } from '../../core/models/stream.model';
@@ -38,7 +39,7 @@ import { locateTimelineTime, sessionTimeToTimelineTime } from '../../utils/recor
 @Component({
   selector: 'app-floating-video-player',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './floating-video-player.component.html',
   styleUrl: './floating-video-player.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -84,6 +85,25 @@ export class FloatingVideoPlayerComponent implements OnDestroy {
 
   public stepFrames = computed(() => this.agentService.currentSessionStepFrames());
   public totalStepFrames = computed(() => this.stepFrames().length);
+
+  /**
+   * Window caption for the floating player.
+   *
+   * Resolved in code: the original inline expression interpolated the counter
+   * itself, which cannot be expressed as a message parameter inside `{{ }}`
+   * (Angular reads `{` there as an ICU block).
+   */
+  public playerWindowTitle(): string {
+    const status = this.agentService.recordingPlaybackStatus();
+    if (status === 'live') return t('player.title.live');
+    if (this.agentService.playerMode() === 'steps') {
+      const total = this.totalStepFrames();
+      const progress = total > 0 ? `${this.activeStepIndex() + 1}/${total}` : '0';
+      return t('player.title.steps', { progress });
+    }
+    if (status === 'processing') return t('player.title.preparing');
+    return this.agentService.activeVideoTitle() || t('video.title.label');
+  }
   public currentStepFrame = computed<StepReplayFrame | null>(() => {
     const frames = this.stepFrames();
     const idx = this.activeStepIndex();
