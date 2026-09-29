@@ -61,11 +61,12 @@ describe('run-info.util', () => {
   });
 
   describe('tuningLabel', () => {
-    it('maps ids to the launcher labels and defaults unknown ids', () => {
-      expect(tuningLabel('verify', 'checkpoints')).toBe('每一步');
-      expect(tuningLabel('verify', 'nonsense')).toBe('任务结束时');
-      expect(tuningLabel('explore', 'ultra')).toBe('局部放大');
-      expect(tuningLabel('explore', null)).toBe('快速一瞥');
+    it('maps ids to the launcher label keys and defaults unknown ids', () => {
+      // Assert keys, not text: the expectation holds in every locale.
+      expect(tuningLabel('verify', 'checkpoints')).toBe('tuning.verify.checkpoints.label');
+      expect(tuningLabel('verify', 'nonsense')).toBe('tuning.verify.final.label');
+      expect(tuningLabel('explore', 'ultra')).toBe('tuning.explore.ultra.label');
+      expect(tuningLabel('explore', null)).toBe('tuning.explore.flash.label');
     });
   });
 

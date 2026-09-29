@@ -1,3 +1,6 @@
+import { EN_MESSAGES } from '../i18n/messages.en';
+import { ZH_CN_MESSAGES } from '../i18n/messages.zh-CN';
+import { Messages } from '../i18n/i18n.service';
 import {
   DEFAULT_EXPLORER_MODE,
   DEFAULT_VERIFICATION_LEVEL,
@@ -7,11 +10,13 @@ import {
   notchPercent
 } from './pro-tuning.model';
 
+const TABLES: Messages[] = [EN_MESSAGES, ZH_CN_MESSAGES];
+
 describe('pro tuning ladders', () => {
   it('keeps every notch id and label unique within its ladder', () => {
     for (const ladder of [VERIFICATION_LEVELS, EXPLORER_MODES]) {
       expect(new Set(ladder.map((l) => l.id)).size).toBe(ladder.length);
-      expect(new Set(ladder.map((l) => l.label)).size).toBe(ladder.length);
+      expect(new Set(ladder.map((l) => l.labelKey)).size).toBe(ladder.length);
     }
   });
 
@@ -24,10 +29,25 @@ describe('pro tuning ladders', () => {
 
   it('every level explains itself', () => {
     for (const level of [...VERIFICATION_LEVELS, ...EXPLORER_MODES]) {
-      expect(level.tagline.length).toBeGreaterThan(10);
-      expect(level.latency.length).toBeGreaterThan(0);
-      expect(level.runs.length).toBeGreaterThan(0);
-      expect(level.bestFor.length).toBeGreaterThan(10);
+      expect(level.runsKeys.length).toBeGreaterThan(0);
+      expect(level.taglineKey).toMatch(/^tuning\./);
+      expect(level.bestForKey).toMatch(/^tuning\./);
+    }
+  });
+
+  it('resolves every referenced key in every shipped locale', () => {
+    // Keys are now the source of truth, so a missing translation is a build-time
+    // failure rather than English text leaking into the Chinese UI.
+    const keys: string[] = [];
+    for (const level of [...VERIFICATION_LEVELS, ...EXPLORER_MODES]) {
+      keys.push(level.labelKey, level.taglineKey, level.latencyKey, level.bestForKey);
+      keys.push(...level.runsKeys, ...(level.skipsKeys ?? []));
+    }
+    for (const table of TABLES) {
+      for (const key of keys) {
+        expect(table[key]).withContext(`missing message for ${key}`).toBeDefined();
+        expect(table[key]!.length).withContext(`empty message for ${key}`).toBeGreaterThan(0);
+      }
     }
   });
 

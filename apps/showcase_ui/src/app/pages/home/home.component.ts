@@ -19,6 +19,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AgentService } from '../../services/agent.service';
 import { SystemService } from '../../services/system.service';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import {
   AdbServerConnectionResult,
   AdbServerDevice,
@@ -85,9 +86,10 @@ function buildDitherPixels(count = 260, seed = 7): DitherPixel[] {
 /** Shared view model for the verification and screen-reading sliders. */
 export interface TuningSliderVm {
   kind: TuningKind;
-  name: string;
-  /** One-word meaning of each end of the track, e.g. ["Off", "Strict"]. */
-  ends: readonly [string, string];
+  /** Message key for the slider title. */
+  nameKey: string;
+  /** Message keys for the one-word meaning of each end of the track. */
+  endsKeys: readonly [string, string];
   ladder: readonly TuningLevel[];
   index: number;
   level: TuningLevel;
@@ -103,7 +105,7 @@ type AdbGuideTab = 'emulator' | 'usb' | 'wifi' | 'remote';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './home.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './home.component.scss'
@@ -238,8 +240,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     return [
       {
         kind: 'verify',
-        name: '结果校验深度',
-        ends: ['关闭', '严格'],
+        nameKey: 'tuning.slider.verify.name',
+        endsKeys: ['tuning.slider.verify.endLow', 'tuning.slider.verify.endHigh'],
         ladder: VERIFICATION_LEVELS,
         index: vi,
         level: VERIFICATION_LEVELS[vi],
@@ -247,8 +249,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       {
         kind: 'explore',
-        name: '屏幕感知深度',
-        ends: ['更快速', '更精准'],
+        nameKey: 'tuning.slider.explore.name',
+        endsKeys: ['tuning.slider.explore.endLow', 'tuning.slider.explore.endHigh'],
         ladder: EXPLORER_MODES,
         index: ei,
         level: EXPLORER_MODES[ei],

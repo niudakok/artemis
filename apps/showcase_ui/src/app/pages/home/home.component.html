@@ -1882,12 +1882,12 @@
                   [style.--pct]="slider.fraction"
                 >
                   <div class="slider-head">
-                    <span class="slider-name">{{ slider.name }}</span>
-                    <span class="slider-value">{{ slider.level.label }}</span>
+                    <span class="slider-name">{{ slider.nameKey | t }}</span>
+                    <span class="slider-value">{{ slider.level.labelKey | t }}</span>
                   </div>
                   <div class="slider-ends" aria-hidden="true">
-                    <span>{{ slider.ends[0] }}</span>
-                    <span>{{ slider.ends[1] }}</span>
+                    <span>{{ slider.endsKeys[0] | t }}</span>
+                    <span>{{ slider.endsKeys[1] | t }}</span>
                   </div>
 
                   <div
@@ -1935,39 +1935,39 @@
                       (input)="setTuningIndex(slider.kind, $any($event.target).value)"
                       (focus)="showTuningTip(slider.kind)"
                       (blur)="hideTuningTip(slider.kind)"
-                      [attr.aria-label]="slider.name"
-                      [attr.aria-valuetext]="slider.level.label + ': ' + slider.level.tagline"
+                      [attr.aria-label]="slider.nameKey | t"
+                      [attr.aria-valuetext]="(slider.level.labelKey | t) + ': ' + (slider.level.taglineKey | t)"
                     />
 
                     @if (activeTuningTip() === slider.kind) {
                       <div class="tuning-tip-arrow" aria-hidden="true"></div>
                       <div class="tuning-tip" role="tooltip">
                         <div class="tip-heading">
-                          <span class="tip-title">{{ slider.level.label }}</span>
-                          <span class="tip-latency">{{ slider.level.latency }}</span>
+                          <span class="tip-title">{{ slider.level.labelKey | t }}</span>
+                          <span class="tip-latency">{{ slider.level.latencyKey | t }}</span>
                         </div>
-                        <p class="tip-tagline">{{ slider.level.tagline }}</p>
+                        <p class="tip-tagline">{{ slider.level.taglineKey | t }}</p>
                         <div class="tip-section">
-                          <span class="tip-section-title">执行行为</span>
+                          <span class="tip-section-title">{{ 'tuning.tip.whatHappens' | t }}</span>
                           <ul>
-                            @for (line of slider.level.runs; track $index) {
-                              <li>{{ line }}</li>
+                            @for (line of slider.level.runsKeys; track $index) {
+                              <li>{{ line | t }}</li>
                             }
                           </ul>
                         </div>
-                        @if (slider.level.skips?.length) {
+                        @if (slider.level.skipsKeys?.length) {
                           <div class="tip-section skips">
-                            <span class="tip-section-title">不包含行为</span>
+                            <span class="tip-section-title">{{ 'tuning.tip.notIncluded' | t }}</span>
                             <ul>
-                              @for (line of slider.level.skips; track $index) {
-                                <li>{{ line }}</li>
+                              @for (line of slider.level.skipsKeys; track $index) {
+                                <li>{{ line | t }}</li>
                               }
                             </ul>
                           </div>
                         }
                         <div class="tip-best">
-                          <span class="tip-section-title">适用场景</span>
-                          <span>{{ slider.level.bestFor }}</span>
+                          <span class="tip-section-title">{{ 'tuning.tip.useItFor' | t }}</span>
+                          <span>{{ slider.level.bestForKey | t }}</span>
                         </div>
                       </div>
                     }

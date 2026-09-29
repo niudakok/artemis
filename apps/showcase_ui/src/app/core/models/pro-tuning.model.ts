@@ -23,110 +23,96 @@
 export type VerificationLevelId = 'off' | 'final' | 'checkpoints' | 'strict';
 export type ExplorerModeId = 'flash' | 'pro' | 'ultra';
 
-/** One notch on a tuning slider. */
+/** One notch on a tuning slider. Holds message keys, not display text. */
 export interface TuningLevel<TId extends string = string> {
   /** Wire value sent to the backend. */
   id: TId;
-  /** Short name shown next to the slider title and as the hover card heading. */
-  label: string;
-  /** One-sentence summary shown in the hover card. */
-  tagline: string;
-  /** Plain-language time cost, e.g. "no extra time". */
-  latency: string;
-  /** Checks or searches performed at this level. */
-  runs: string[];
-  /** Checks or searches omitted at this level. */
-  skips?: string[];
-  /** When to pick this level. */
-  bestFor: string;
+  /** Message key for the short name next to the slider title. */
+  labelKey: string;
+  /** Message key for the one-sentence summary in the hover card. */
+  taglineKey: string;
+  /** Message key for the plain-language time cost, e.g. "no extra time". */
+  latencyKey: string;
+  /** Message keys for the checks or searches performed at this level. */
+  runsKeys: readonly string[];
+  /** Message keys for the checks or searches omitted at this level. */
+  skipsKeys?: readonly string[];
+  /** Message key for when to pick this level. */
+  bestForKey: string;
 }
+
+/** Message-key namespace for a ladder, e.g. `tuning.verify` or `tuning.explore`. */
+const VERIFY_NS = 'tuning.verify';
+const EXPLORE_NS = 'tuning.explore';
 
 export const VERIFICATION_LEVELS: readonly TuningLevel<VerificationLevelId>[] = [
   {
     id: 'off',
-    label: '关闭',
-    tagline: '不做任何校验：任务看起来完成即立即结束。',
-    latency: '不增加额外耗时',
-    runs: [
-      '每执行完一个步骤即视为完成。',
-      '你会获得完整的动作轨迹，但没有通过 / 失败的判定结论。'
-    ],
-    skips: ['不进行任何二次核对，也不进行任何重试。'],
-    bestFor: '快速尝试与功能演示，只想观察执行过程时使用。'
+    labelKey: `${VERIFY_NS}.off.label`,
+    taglineKey: `${VERIFY_NS}.off.tagline`,
+    latencyKey: `${VERIFY_NS}.off.latency`,
+    runsKeys: [`${VERIFY_NS}.off.runs.0`, `${VERIFY_NS}.off.runs.1`],
+    skipsKeys: [`${VERIFY_NS}.off.skips.0`],
+    bestForKey: `${VERIFY_NS}.off.bestFor`
   },
   {
     id: 'final',
-    label: '任务结束时',
-    tagline: '任务结束后，对最终结果与你的目标做一次校验。这是默认档位。',
-    latency: '在结尾增加约 20–60 秒',
-    runs: [
-      '任务结束时，会比对最终屏幕画面、步骤历史与设备状态是否与你的要求一致。',
-      '若结果不符，任务会回退并尝试修复，最多 3 次。'
-    ],
-    skips: ['任务运行过程中不做任何中间校验。'],
-    bestFor: '日常常规任务：在几乎不拖慢速度的前提下，得到诚实的通过 / 失败结论。'
+    labelKey: `${VERIFY_NS}.final.label`,
+    taglineKey: `${VERIFY_NS}.final.tagline`,
+    latencyKey: `${VERIFY_NS}.final.latency`,
+    runsKeys: [`${VERIFY_NS}.final.runs.0`, `${VERIFY_NS}.final.runs.1`],
+    skipsKeys: [`${VERIFY_NS}.final.skips.0`],
+    bestForKey: `${VERIFY_NS}.final.bestFor`
   },
   {
     id: 'checkpoints',
-    label: '每一步',
-    tagline: '每个步骤完成后立即校验，并在结尾再做一次最终校验。',
-    latency: '每步之后有一次短校验，在后台执行',
-    runs: [
-      '每个步骤完成后会立刻用当时的截图进行校验。',
-      '如果某步出错，会先修复再继续（每步最多 2 次尝试）。',
-      '未通过的测试条件会被记录下来，任务继续执行。',
-      '结尾仍会执行最终校验。'
+    labelKey: `${VERIFY_NS}.checkpoints.label`,
+    taglineKey: `${VERIFY_NS}.checkpoints.tagline`,
+    latencyKey: `${VERIFY_NS}.checkpoints.latency`,
+    runsKeys: [
+      `${VERIFY_NS}.checkpoints.runs.0`,
+      `${VERIFY_NS}.checkpoints.runs.1`,
+      `${VERIFY_NS}.checkpoints.runs.2`,
+      `${VERIFY_NS}.checkpoints.runs.3`
     ],
-    bestFor: '长流程任务：早期一个错误若不及时纠正，会毁掉后续全部工作。'
+    bestForKey: `${VERIFY_NS}.checkpoints.bestFor`
   },
   {
     id: 'strict',
-    label: '严格模式',
-    tagline: '每个步骤都校验，且重试次数更多。首个测试失败立即终止任务。',
-    latency: '最慢：校验更多、重试更多',
-    runs: [
-      '每次校验耗时更长、尝试次数更多：每步最多 4 次修复，结尾最多 5 次。',
-      '首个失败的测试条件会立即终止任务，并附带完整证据。'
-    ],
-    bestFor: '发布前验收与回归测试，绝不容忍错误的通过结论。'
+    labelKey: `${VERIFY_NS}.strict.label`,
+    taglineKey: `${VERIFY_NS}.strict.tagline`,
+    latencyKey: `${VERIFY_NS}.strict.latency`,
+    runsKeys: [`${VERIFY_NS}.strict.runs.0`, `${VERIFY_NS}.strict.runs.1`],
+    bestForKey: `${VERIFY_NS}.strict.bestFor`
   }
 ];
 
 export const EXPLORER_MODES: readonly TuningLevel<ExplorerModeId>[] = [
   {
     id: 'flash',
-    label: '快速一瞥',
-    tagline: '一眼扫过即可定位屏幕上的按钮与文字。',
-    latency: '每次查找 1 次感知',
-    runs: [
-      '按名称、图标或颜色查找屏幕上的元素，并立即返回其位置坐标。',
-      '可同时查找多个元素。'
-    ],
-    skips: ['不做局部放大，也不做二次尝试。'],
-    bestFor: '按钮、图标与文字标注清晰的普通 App。'
+    labelKey: `${EXPLORE_NS}.flash.label`,
+    taglineKey: `${EXPLORE_NS}.flash.tagline`,
+    latencyKey: `${EXPLORE_NS}.flash.latency`,
+    runsKeys: [`${EXPLORE_NS}.flash.runs.0`, `${EXPLORE_NS}.flash.runs.1`],
+    skipsKeys: [`${EXPLORE_NS}.flash.skips.0`],
+    bestForKey: `${EXPLORE_NS}.flash.bestFor`
   },
   {
     id: 'pro',
-    label: '二次确认',
-    tagline: '最多感知 3 次，中间进行推理，再给出答案。',
-    latency: '每次查找最多 3 次感知',
-    runs: [
-      '先读取屏幕层级结构，再对画面进行搜索。',
-      '若首次未命中，会在 3 次感知内换用其它策略重新查找。'
-    ],
-    skips: ['仍不做小区域放大，以保持查找速度。'],
-    bestFor: '以相对位置描述的控件（如「Wi-Fi 旁边的开关」）或标注不清晰的元素。'
+    labelKey: `${EXPLORE_NS}.pro.label`,
+    taglineKey: `${EXPLORE_NS}.pro.tagline`,
+    latencyKey: `${EXPLORE_NS}.pro.latency`,
+    runsKeys: [`${EXPLORE_NS}.pro.runs.0`, `${EXPLORE_NS}.pro.runs.1`],
+    skipsKeys: [`${EXPLORE_NS}.pro.skips.0`],
+    bestForKey: `${EXPLORE_NS}.pro.bestFor`
   },
   {
     id: 'ultra',
-    label: '局部放大',
-    tagline: '对屏幕局部进行放大裁剪，最多感知 8 次。',
-    latency: '每次查找最多 8 次感知（最慢）',
-    runs: [
-      '可裁剪并放大屏幕局部，逐块阅读微小文字与密集排版。',
-      '后续感知会复用前次结果，因此实际耗时比听起来更少。'
-    ],
-    bestFor: '元素密集的界面、极小的目标、图表与手绘内容，以及对精确位置要求极高的校验。'
+    labelKey: `${EXPLORE_NS}.ultra.label`,
+    taglineKey: `${EXPLORE_NS}.ultra.tagline`,
+    latencyKey: `${EXPLORE_NS}.ultra.latency`,
+    runsKeys: [`${EXPLORE_NS}.ultra.runs.0`, `${EXPLORE_NS}.ultra.runs.1`],
+    bestForKey: `${EXPLORE_NS}.ultra.bestFor`
   }
 ];
 

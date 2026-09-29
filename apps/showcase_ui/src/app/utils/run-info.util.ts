@@ -83,12 +83,12 @@ export function sessionElapsedSeconds(
   return Math.max(0, Math.round((endMs - startMs) / 1000));
 }
 
-/** Plain-language label for a tuning id, falling back to the ladder default. */
+/** Message key for a tuning id, falling back to the ladder default. */
 export function tuningLabel(kind: 'verify' | 'explore', id: string | null | undefined): string {
   if (kind === 'verify') {
-    return VERIFICATION_LEVELS[levelIndex(VERIFICATION_LEVELS, id, DEFAULT_VERIFICATION_LEVEL)].label;
+    return VERIFICATION_LEVELS[levelIndex(VERIFICATION_LEVELS, id, DEFAULT_VERIFICATION_LEVEL)].labelKey;
   }
-  return EXPLORER_MODES[levelIndex(EXPLORER_MODES, id, DEFAULT_EXPLORER_MODE)].label;
+  return EXPLORER_MODES[levelIndex(EXPLORER_MODES, id, DEFAULT_EXPLORER_MODE)].labelKey;
 }
 
 /**
