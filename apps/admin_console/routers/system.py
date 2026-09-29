@@ -284,6 +284,17 @@ class ValidateCredentialsRequest(BaseModel):
     base_url: str | None = Field(default=None, description="Optional custom base URL")
 
 
+class CustomModelRequest(BaseModel):
+    """Payload to point ARTEMIS at a custom OpenAI-compatible endpoint."""
+
+    base_url: str = Field(
+        description="OpenAI-compatible Base URL (e.g. https://relay.example/v1 or http://127.0.0.1:11434/v1)"
+    )
+    model: str = Field(description="Model identifier to use as the default")
+    api_key: str = Field(default="", description="API key for the endpoint (empty for local Ollama)")
+    persist_to_env: bool = Field(default=True, description="Persist Base URL + key to .env")
+
+
 @router.get("/credentials")
 async def get_credentials():
     """Report which providers have an API key configured.
@@ -368,6 +379,41 @@ async def update_credentials(request: UpdateCredentialsRequest):
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to update credentials: {exc}")
+
+
+@router.post("/model/custom")
+async def set_custom_model(request: CustomModelRequest):
+    """Point ARTEMIS at a custom OpenAI-compatible endpoint (Base URL + model + key).
+
+    Writes ``OPENAI_API_KEY`` / ``OPENAI_BASE_URL`` to ``.env`` and sets the
+    ``default`` block of ``config/artemis.jsonc`` to provider ``openai`` with
+    the chosen model, then returns an updated readiness report.
+    """
+    from apps.admin_console.services.custom_model_service import apply_custom_model
+
+    try:
+        result = apply_custom_model(
+            base_url=request.base_url,
+            model=request.model,
+            api_key=request.api_key,
+            persist=request.persist_to_env,
+        )
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to apply custom model: {exc}")
+
+    readiness_engine.invalidate_cache()
+    updated_report = await readiness_engine.run_all(force_refresh=True)
+    result["status"] = "success"
+    result["message"] = (
+        "ARTEMIS is now configured to use the custom OpenAI-compatible model "
+        f"{result['model']} at {result['base_url']}."
+    )
+    result["report"] = updated_report
+    return result
 
 
 @router.get("/model-config-env")
