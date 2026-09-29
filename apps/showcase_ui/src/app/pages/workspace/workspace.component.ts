@@ -17,6 +17,8 @@
 import { Component, ChangeDetectionStrategy, NgZone, DestroyRef, inject, computed, signal, ViewChild, ElementRef, OnInit } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
+import { t } from '../../core/i18n/runtime';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { AgentStreamComponent } from '../../components/agent-stream/agent-stream.component';
 import { ChatInterfaceComponent } from '../../components/chat-interface/chat-interface.component';
 import { FloatingVideoPlayerComponent } from '../../components/floating-video-player/floating-video-player.component';
@@ -29,8 +31,9 @@ import { AgentService } from '../../services/agent.service';
     FormsModule,
     AgentStreamComponent,
     ChatInterfaceComponent,
-    FloatingVideoPlayerComponent
-],
+    FloatingVideoPlayerComponent,
+    TranslatePipe
+  ],
   templateUrl: './workspace.component.html',
   styleUrl: './workspace.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -112,13 +115,13 @@ export class WorkspaceComponent implements OnInit {
       const truncated = session.initial_goal.length > 45
         ? session.initial_goal.substring(0, 42) + '...'
         : session.initial_goal;
-      return `停止当前任务："${truncated}"`;
+      return t('workspace.stopWithGoal', { goal: truncated });
     }
     const curId = this.agentService.currentSessionId();
     if (curId) {
-      return `停止当前任务 (${curId})`;
+      return t('workspace.stopWithId', { id: curId });
     }
-    return '停止当前正在执行的任务';
+    return t('workspace.stop');
   });
 
   /**
@@ -244,7 +247,7 @@ export class WorkspaceComponent implements OnInit {
       error: (err) => {
         console.error('Failed to submit task:', err);
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.error?.detail || '执行器正忙，请等待当前任务完成后再下发新指令。');
+        this.errorMessage.set(err.error?.detail || t('workspace.runnerBusy'));
         setTimeout(() => {
           this.errorMessage.set(null);
         }, 5000);
