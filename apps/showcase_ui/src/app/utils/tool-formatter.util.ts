@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { t } from '../core/i18n/runtime';
 import { ActionParam } from '../core/models/stream.model';
 import { extractNumbersFromCoordinateValue, isPureDirectionString, parseSequenceCoordinates } from './image-overlay.util';
 
@@ -138,7 +139,7 @@ function parseVideoResultText(text: string): Partial<VideoAnalysisView> {
     return { outcome: 'failed', summary: value };
   }
   if (value.includes('Analysis is already in progress in another video agent')) {
-    return { outcome: 'waiting', summary: '已有另一个视频分析智能体正在分析该段证据。' };
+    return { outcome: 'waiting', summary: t('tool.video.alreadyAnalyzing') };
   }
   return { outcome: 'complete', summary: value };
 }
@@ -175,14 +176,14 @@ export function getVideoAnalysisView(tool: any): VideoAnalysisView | null {
   const completedCount = Number(structured.completed_count ?? completedRanges.length ?? 0);
   const totalCount = Number(structured.total_count ?? (completedRanges.length + failedRanges.length));
   const titleByOutcome: Record<VideoAnalysisOutcome, string> = {
-    running: '正在分析屏幕录制视频',
-    recovering: '正在分析未完成的录制片段',
-    waiting: '等待已有的视频分析完成',
+    running: t('tool.video.status.running'),
+    recovering: t('tool.video.status.recovering'),
+    waiting: t('tool.video.status.waiting'),
     complete: structured.reuse === 'full' || parsed.reuse === 'full'
-      ? '已复用既有视频分析结果'
-      : '已完成屏幕录制视频分析',
-    partial: '视频分析部分完成',
-    failed: '视频分析未返回任何结果'
+      ? t('tool.video.title.reused')
+      : t('tool.video.title.complete'),
+    partial: t('tool.video.title.partial'),
+    failed: t('tool.video.title.failed')
   };
 
   return {
@@ -295,16 +296,16 @@ export function getToolAgentName(tool: any): string | null {
     return null; // Omit self-healing label per user instruction
   }
   if (name.includes('outputter')) {
-    return '输出整理器';
+    return t('tool.agent.outputter');
   }
   if (name.includes('validator')) {
-    return '校验器';
+    return t('tool.agent.validator');
   }
   if (name.includes('diagnos')) {
-    return '诊断器';
+    return t('tool.agent.diagnoser');
   }
   if (name.includes('explorer')) {
-    return '元素定位器';
+    return t('tool.agent.explorer');
   }
   return null;
 }
@@ -558,9 +559,12 @@ export function getToolDisplayLabel(tool: any, isFirstSaveNote: boolean = false)
     case 'manage_app':
     case 'launch_app': {
       const rawApp = args.app_name || args.package_name || args.app || '';
-      const app = rawApp || '应用';
+      // Capitalise for Latin scripts; a no-op for CJK, so this stays shared.
+      const app = rawApp ? rawApp.charAt(0).toUpperCase() + rawApp.slice(1) : t('tool.app.generic');
       const rawAction = args.action ? String(args.action).toLowerCase() : '';
-      const verb = rawAction === 'launch' ? '正在启动' : (rawAction === 'stop' || rawAction === 'close' ? '正在停止' : '正在管理');
+      const verb = rawAction === 'launch'
+        ? t('tool.verb.launching')
+        : (rawAction === 'stop' || rawAction === 'close' ? t('tool.verb.stopping') : t('tool.verb.managing'));
       return `${verb} "${app}"`;
     }
 
@@ -568,143 +572,153 @@ export function getToolDisplayLabel(tool: any, isFirstSaveNote: boolean = false)
     case 'wait_delay':
     case 'wait': {
       const delay = args.delay_seconds || args.seconds || args.delay || args.duration;
-      return delay ? `等待 ${delay} 秒...` : '正在等待延时...';
+      if (!delay) return t('tool.action.waitDelay');
+      return Number(delay) > 1
+        ? t('tool.action.waitSeconds', { delay })
+        : t('tool.action.waitSecond', { delay });
     }
     case 'wait_for_text': {
       const text = args.text || args.target_text || '';
-      return text ? `等待文本「${text}」出现在屏幕上` : '等待屏幕上出现指定文本';
+      return text ? t('tool.action.waitText', { text }) : t('tool.action.waitTextGeneric');
     }
 
     case 'input_text':
     case 'input': {
       const text = args.text || args.input_text || '';
-      return text ? `正在向输入框输入文本「${text}」` : '正在向输入框输入文本';
+      return text ? t('tool.action.enterText', { text }) : t('tool.action.enterTextGeneric');
     }
     case 'focus_and_input_text': {
       const text = args.text || args.input_text || '';
-      return text ? `正在聚焦输入框并输入「${text}」` : '正在聚焦输入框并输入文本';
+      return text ? t('tool.action.focusAndType', { text }) : t('tool.action.focusAndTypeGeneric');
     }
     case 'focus_and_clear_text':
-      return '聚焦输入框并清空原有文本';
+      return t('tool.action.focusAndClear');
 
     case 'click':
     case 'tap': {
       const target = args.target_text || args.text || args.query || '';
-      return target ? `点击「${target}」` : '点击屏幕元素';
+      return target ? t('tool.action.tap', { target }) : t('tool.action.tapGeneric');
     }
     case 'click_sequence':
-      return '执行连续点击序列';
+      return t('tool.action.clickSequence');
     case 'long_press': {
       const target = args.target_text || args.text || '';
-      return target ? `长按「${target}」` : '长按屏幕元素';
+      return target ? t('tool.action.longPress', { target }) : t('tool.action.longPressGeneric');
     }
     case 'swipe': {
       const dir = args.action || args.direction || '';
-      return dir ? `在屏幕上向 ${String(dir).toUpperCase()} 方向滑动` : '滑动屏幕';
+      return dir ? t('tool.action.swipe', { dir: String(dir).toUpperCase() }) : t('tool.action.swipeGeneric');
     }
     case 'press_key': {
       const key = args.key || args.keycode || '';
-      return key ? `按下按键 ${String(key).toUpperCase()}` : '按下物理按键';
+      return key ? t('tool.action.pressKey', { key: String(key).toUpperCase() }) : t('tool.action.pressKeyGeneric');
     }
 
     case 'save_note':
-      return isFirstSaveNote ? '创建笔记' : '保存笔记';
+      return isFirstSaveNote ? t('tool.action.createNote') : t('tool.action.saveNote');
     case 'read_note':
-      return '读取笔记';
+      return t('tool.action.readNote');
     case 'list_notes':
-      return '浏览全部已保存的笔记';
+      return t('tool.action.browseNotes');
     case 'update_note':
-      return '更新笔记';
+      return t('tool.action.updateNote');
     case 'append_note':
-      return '更新笔记';
+      return t('tool.action.updateNote');
 
     case 'object_detection': {
       const q = Array.isArray(args.queries) ? args.queries.join(', ') : (args.queries || '');
-      return q ? `在屏幕上定位: 「${q}」` : '在屏幕上定位界面元素';
+      return q ? t('tool.action.locate', { q }) : t('tool.action.locateGeneric');
     }
     case 'ask_explorer': {
       const query = args.query || args.prompt || '';
-      return query ? `在屏幕上查找: 「${query}」` : '在屏幕上查找';
+      return query ? t('tool.action.searchScreen', { query }) : t('tool.action.searchScreenGeneric');
     }
     case 'report_failure_analysis': {
       const reason = args.reason || args.analysis || '';
-      return reason ? `排查问题: ${reason}` : '排查执行异常问题';
+      return reason ? t('tool.action.investigate', { reason }) : t('tool.action.investigateGeneric');
     }
     case 'run_adb_command':
     case 'run_short_adb_command': {
       const cmd = args.command || args.cmd || '';
-      return cmd ? `执行命令: ${cmd}` : '执行系统命令';
+      return cmd ? t('tool.action.runCommand', { cmd }) : t('tool.action.runCommandGeneric');
     }
     case 'search_logs':
     case 'read_logs': {
       const q = args.query || args.filter || '';
-      return q ? `在日志中检索「${q}」` : '分析系统日志';
+      return q ? t('tool.action.searchLogs', { q }) : t('tool.action.searchLogsGeneric');
     }
     case 'log_analyzer':
     case 'output_analyzer':
-      return '分析运行日志';
+      return t('tool.action.analyzeLogs');
     case 'diagnoser':
     case 'diagnose':
-      return '诊断异常问题';
+      return t('tool.action.diagnose');
     case 'video_analyzer':
     case 'video_analyzer_pure':
-      return '分析屏幕录制视频';
+      return t('tool.action.analyzeRecording');
     case 'extract_segment_metadata': {
       const start = args.start_time !== undefined ? `${args.start_time}s` : '';
       const end = args.end_time !== undefined ? `${args.end_time}s` : '';
       const range = (start && end) ? ` (${start} - ${end})` : (start ? ` (from ${start})` : '');
-      return `裁剪屏幕录制片段${range}`;
+      return t('tool.action.cropSegment', { range });
     }
     case 'spawn_sub_agent': {
       const q = args.specific_query || args.query || args.prompt || '';
-      return q ? `调用子智能体分析录屏: 「${q}」` : '调用子智能体分析录屏';
+      return q ? t('tool.action.subAgentRecording', { q }) : t('tool.action.subAgentRecordingGeneric');
     }
     case 'analyze_audio_only': {
       const q = args.specific_query || args.query || '';
-      return q ? `分析音频轨道: 「${q}」` : '分析录屏中的音频轨道';
+      return q ? t('tool.action.audioTrack', { q }) : t('tool.action.audioTrackGeneric');
     }
     case 'search_history': {
       const q = args.query || '';
       const range = Array.isArray(args.step_range) && args.step_range.length
-        ? `（第 ${args.step_range[0]}–${args.step_range[args.step_range.length - 1]} 步）`
+        ? t('tool.range.steps', { start: args.step_range[0], end: args.step_range[args.step_range.length - 1] })
         : '';
-      return q ? `在历史执行记录中检索「${q}」${range}` : `检索历史执行记录${range}`;
+      return q ? t('tool.action.historySearch', { q, range }) : t('tool.action.historySearchGeneric', { range });
     }
     case 'replay_steps': {
       const n = args.start_step;
       const end = args.end_step;
       if (n !== undefined && n !== '' && end !== undefined && end !== null && end !== '' && String(end) !== String(n)) {
-        return `回看第 ${n}–${end} 步`;
+        return t('tool.action.reviewRange', { start: n, end });
       }
-      return n !== undefined && n !== '' ? `回看第 ${n} 步` : '回看步骤详情';
+      return n !== undefined && n !== '' ? t('tool.action.reviewStep', { n }) : t('tool.action.reviewStepGeneric');
     }
     case 'get_step_screenshot': {
       const n = args.step_number;
       const variant = String(args.which || '').toLowerCase();
       if (variant === 'overlay') {
-        return n !== undefined && n !== '' ? `查看第 ${n} 步动作的落点` : '查看动作落点';
+        return n !== undefined && n !== '' ? t('tool.action.actionLanding', { n }) : t('tool.action.actionLandingGeneric');
       }
-      const which = variant === 'post' ? '之后' : '之前';
-      return n !== undefined && n !== '' ? `查看第 ${n} 步${which}的屏幕画面` : '查看某一步骤的屏幕截图';
+      const which = variant === 'post' ? t('tool.range.after') : t('tool.range.before');
+      return n !== undefined && n !== ''
+        ? t('tool.action.screenAroundStep', { n, which })
+        : t('tool.action.screenAroundStepGeneric');
     }
     case 'probe_device': {
       const kind = args.kind ? String(args.kind).replace(/_/g, ' ') : '';
-      return kind ? `从设备读取 ${kind} 相关信息` : '读取设备状态';
+      return kind ? t('tool.action.readDeviceState', { kind }) : t('tool.action.readDeviceStateGeneric');
     }
     case 'outputter':
     case 'output_synthesis':
-      return '汇总生成输出报告';
+      return t('tool.action.synthesizeReport');
     case 'web_search': {
       const q = args.query || '';
-      return q ? `联网搜索「${q}」` : '联网搜索';
+      return q ? t('tool.action.webSearch', { q }) : t('tool.action.webSearchGeneric');
     }
     case 'read_url':
-      return '抓取网页内容';
+      return t('tool.action.fetchPage');
     case 'compress_history':
       return getCompressionLabel(tool);
 
-    default:
-      return `执行操作 ${cleanName}`;
+    default: {
+      const displayName = cleanName
+        .split('_')
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+      return t('tool.action.execute', { name: displayName });
+    }
   }
 }
 
@@ -722,49 +736,61 @@ export function getCompressionLabel(tool: any): string {
   const end = Number(args.end_step);
   const hasRange = Number.isFinite(start) && Number.isFinite(end) && start > 0 && end > 0;
   const range = hasRange
-    ? (start === end ? `第 ${start} 步` : `第 ${start}–${end} 步`)
-    : '更早的步骤';
+    ? (start === end
+        ? t('tool.compress.range.one', { n: start })
+        : t('tool.compress.range.many', { start, end }))
+    : t('tool.compress.range.earlier');
+  // Sentence-initial capital for Latin scripts; a no-op for CJK.
   const rangeCapitalized = range.charAt(0).toUpperCase() + range.slice(1);
   const status = String(tool?.status || '').toLowerCase();
   const phase = getCompressionPhase(tool);
 
   if (status === 'failed' || phase === 'failed') {
-    return `暂时无法压缩${range}，已保留完整记录并稍后重试`;
+    return t('tool.compress.failed', { range });
   }
   if (status !== 'success') {
     const note = String(args.note || '').toLowerCase();
-    if (note === 'retrying') return `正在重试${range}的记忆摘要…`;
+    if (note === 'retrying') return t('tool.compress.retrying', { range });
     if (note === 'held' || phase === 'ready') {
       const swapAt = Number(args.swap_at_tokens);
       const heldContext = Number(args.context_tokens);
-      const heldParts = [`${range}的简短记忆已就绪；在上下文占满前保留完整记录`];
+      const heldParts = [t('tool.compress.held', { range })];
       if (heldContext > 0 && swapAt > 0) {
-        heldParts.push(`≈ ${formatTokenFigure(heldContext)} / ${formatTokenFigure(swapAt)} Token`);
+        heldParts.push(t('tool.compress.swapAt', {
+          context: formatTokenFigure(heldContext),
+          budget: formatTokenFigure(swapAt)
+        }));
       }
       return heldParts.join(' · ');
     }
-    return `正在将${range}压缩为简短记忆以释放上下文…`;
+    return t('tool.compress.running', { range });
   }
 
   const parts: string[] = [];
   const source = Number(args.source_tokens);
   const summary = Number(args.summary_tokens);
   if (args.forced) {
-    parts.push(`${range}已压缩为摘要以释放记忆空间`);
+    parts.push(t('tool.compress.recap', { range: rangeCapitalized }));
   } else {
-    parts.push(`${range}已压缩为简短记忆`);
+    parts.push(t('tool.compress.done', { range: rangeCapitalized }));
     if (source > 0 && summary > 0) {
       const factor = source / summary;
-      const factorText = factor >= 2 ? `（缩小至 ${Math.round(factor)} 倍）` : '';
-      parts.push(`${formatTokenFigure(source)} → ${formatTokenFigure(summary)} Token${factorText}`);
+      const factorText = factor >= 2 ? t('tool.compress.factor', { factor: Math.round(factor) }) : '';
+      parts.push(t('tool.compress.tokenDelta', {
+        source: formatTokenFigure(source),
+        summary: formatTokenFigure(summary)
+      }) + factorText);
     }
   }
   const context = Number(args.context_tokens);
   const budget = Number(args.context_budget);
   if (context > 0) {
     parts.push(budget > 0
-      ? `工作记忆 ≈ ${formatTokenFigure(context)} / ${formatTokenFigure(budget)} Token`
-      : `工作记忆 ≈ ${formatTokenFigure(context)} Token`);
+      ? t('tool.compress.workingMemory', {
+          context: formatTokenFigure(context),
+          budget: formatTokenFigure(budget)
+        })
+      : t('tool.compress.workingMemoryNoBudget', { context: formatTokenFigure(context) }));
   }
   return parts.join(' · ');
 }
@@ -802,13 +828,13 @@ export function getCompressionPhase(tool: any): CompressionPhase {
 export function getCompressionPhaseLabel(tool: any): string {
   switch (getCompressionPhase(tool)) {
     case 'ready':
-      return '摘要已就绪，待上下文占满时启用';
+      return t('tool.compress.phase.ready');
     case 'applied':
-      return '该段记录已被其摘要替换';
+      return t('tool.compress.phase.applied');
     case 'failed':
-      return '摘要生成失败，已保留完整记录';
+      return t('tool.compress.phase.failed');
     default:
-      return '正在生成该段摘要';
+      return t('tool.compress.phase.summarizing');
   }
 }
 
@@ -898,76 +924,76 @@ export function getToolIcon(tool: any): string {
  * Get formatted title for a tool call card
  */
 export function getToolTitle(tool: any): string {
-  if (!tool || !tool.name) return '工具调用';
+  if (!tool || !tool.name) return t('tool.title.fallback');
   const cleanName = tool.name.replace(/^(_)?exec_/, '');
   const name = cleanName.toLowerCase();
   switch (name) {
     case 'click':
     case 'tap':
-      return '点击元素';
+      return t('tool.title.tap');
     case 'click_sequence':
-      return '执行连续点击序列';
+      return t('tool.title.clickSequence');
     case 'long_press':
-      return '长按元素';
+      return t('tool.title.longPress');
     case 'input_text':
     case 'input':
-      return '输入文本';
+      return t('tool.title.enterText');
     case 'swipe':
     case 'scroll': {
       const args = getToolArgs(tool);
       const dir = args.direction || args.gesture || (typeof args.action === 'string' ? args.action : '');
-      if (dir && isPureDirectionString(dir)) return `滑动屏幕（${String(dir).toUpperCase()}）`;
-      return '滑动屏幕';
+      if (dir && isPureDirectionString(dir)) return t('tool.title.swipeDir', { dir: String(dir).toUpperCase() });
+      return t('tool.title.swipe');
     }
     case 'drag':
     case 'drag_and_drop':
-      return '拖拽屏幕';
+      return t('tool.title.drag');
     case 'press_key':
-      return '按下物理按键';
+      return t('tool.title.pressKey');
     case 'manage_app':
     case 'launch_app': {
       const args = getToolArgs(tool);
       const rawAction = args.action ? String(args.action).toLowerCase() : '';
-      if (rawAction === 'launch') return '启动应用';
-      if (rawAction === 'stop' || rawAction === 'close') return '停止应用';
-      return '管理应用';
+      if (rawAction === 'launch') return t('tool.title.launchApp');
+      if (rawAction === 'stop' || rawAction === 'close') return t('tool.title.stopApp');
+      return t('tool.title.manageApp');
     }
     case 'wait_for_delay':
     case 'wait_delay':
-      return '等待延时';
+      return t('tool.title.waitDelay');
     case 'wait_for_text':
-      return '等待指定文本出现';
+      return t('tool.title.waitText');
     case 'object_detection':
-      return '定位界面元素';
+      return t('tool.title.locate');
     case 'ask_explorer':
-      return '在屏幕上查找';
+      return t('tool.title.searchScreen');
     case 'report_failure_analysis':
-      return '排查异常问题';
+      return t('tool.title.investigate');
     case 'run_adb_command':
     case 'run_short_adb_command':
-      return '执行系统命令';
+      return t('tool.title.runCommand');
     case 'web_search':
-      return '联网搜索';
+      return t('tool.title.webSearch');
     case 'read_url':
-      return '抓取网页内容';
+      return t('tool.title.fetchPage');
     case 'search_logs':
     case 'read_logs':
-      return '检索运行日志';
+      return t('tool.title.searchLogs');
     case 'log_analyzer':
     case 'output_analyzer':
-      return '分析运行日志';
+      return t('tool.title.analyzeLogs');
     case 'diagnoser':
     case 'diagnose':
-      return '诊断异常问题';
+      return t('tool.title.diagnose');
     case 'video_analyzer':
     case 'video_analyzer_pure':
-      return '分析屏幕录制视频';
+      return t('tool.title.analyzeRecording');
     case 'extract_segment_metadata':
-      return '裁剪屏幕录制片段';
+      return t('tool.title.cropSegment');
     case 'spawn_sub_agent':
-      return '下发视频分析任务';
+      return t('tool.title.delegateVideo');
     case 'analyze_audio_only':
-      return '分析音频轨道';
+      return t('tool.title.audioTrack');
     default:
       return cleanName.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
   }
@@ -1034,10 +1060,10 @@ export function getToolTargetText(tool: any): string {
     return args.target;
   }
   if (args.target && typeof args.target === 'number') {
-    return `元素 #${args.target}`;
+    return t('tool.target.byTarget', { target: args.target });
   }
   if (args.index !== undefined) {
-    return `元素 #${args.index}`;
+    return t('tool.target.byIndex', { index: args.index });
   }
   return args.target_text || args.target_description || args.target_class || args.element || args.element_text || (name !== 'input_text' ? args.text : '') || '';
 }
@@ -1046,26 +1072,26 @@ export function getToolTargetText(tool: any): string {
  * Get input label for tools
  */
 export function getToolInputLabel(tool: any): string {
-  if (!tool || !tool.name) return '输入';
+  if (!tool || !tool.name) return t('tool.input.fallback');
   const name = tool.name.toLowerCase().replace(/^(_)?exec_/, '');
   if (name === 'wait_for_delay' || name === 'wait_delay' || name === 'delay' || name === 'wait') {
-    return '时长';
+    return t('tool.input.duration');
   }
   if (name === 'swipe' || name === 'scroll' || name === 'drag' || name === 'drag_and_drop') {
     const args = getToolArgs(tool);
     const dir = args.direction || args.gesture || (typeof args.action === 'string' ? args.action : '');
     if (dir && isPureDirectionString(dir)) {
-      return '方向';
+      return t('tool.input.direction');
     }
-    return '输入';
+    return t('tool.input.fallback');
   }
   if (name === 'press_key' || name === 'press_home' || name === 'press_back') {
-    return '按键';
+    return t('tool.input.key');
   }
   if (name === 'input_text' || name === 'input') {
-    return '输入文本';
+    return t('tool.input.text');
   }
-  return '输入';
+  return t('tool.input.fallback');
 }
 
 /**
@@ -1089,7 +1115,7 @@ export function getToolInputText(tool: any): string {
     return args.time_in_ms ? `${args.time_in_ms}ms` : (args.delay_ms ? `${args.delay_ms}ms` : (args.time ? `${args.time}` : ''));
   }
   if (name === 'long_press' && args.duration) {
-    return `时长: ${args.duration}ms`;
+    return t('tool.input.durationValue', { duration: args.duration });
   }
   if (name === 'input_text' || name === 'input') {
     return args.text || args.input_text || '';
@@ -1220,14 +1246,14 @@ export function isToolFailed(tool: any): boolean {
  * Get error message for a failed tool
  */
 export function getToolErrorMessage(tool: any): string {
-  if (!tool) return '工具执行失败';
+  if (!tool) return t('tool.error.toolFailed');
   const args = getToolArgs(tool);
-  if (args.status === 'cannot_fix') return '状态: 无法修复';
+  if (args.status === 'cannot_fix') return t('tool.error.cannotFix');
   if (args.error || args.message || args.failure_reason) {
     return args.error || args.message || args.failure_reason;
   }
   if (tool.error || tool.message) return tool.error || tool.message;
-  return '动作执行失败';
+  return t('tool.error.actionFailed');
 }
 
 /**
@@ -1363,7 +1389,7 @@ export function cleanErrorMessage(rawError: any): string {
   }
 
   const errorStr = String(rawError).trim();
-  if (!errorStr) return '未知错误';
+  if (!errorStr) return t('common.unknownError');
 
   // 1. Try regex extraction for "message": "..."
   const doubleQuoteMsgMatch = errorStr.match(/"message"\s*:\s*"((?:[^"\\]|\\.)*)"/i);
@@ -1415,5 +1441,5 @@ export function cleanErrorMessage(rawError: any): string {
     .replace(/^(?:LLM\s+(?:Request\s+)?Error\s*:\s*)+/i, '')
     .trim();
 
-  return fallback || '未知错误';
+  return fallback || t('common.unknownError');
 }

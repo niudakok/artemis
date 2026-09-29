@@ -18,6 +18,8 @@ import { Injectable, computed, signal } from '@angular/core';
 
 import { EN_MESSAGES } from './messages.en';
 import { ZH_CN_MESSAGES } from './messages.zh-CN';
+import { setRuntimeTranslator } from './runtime';
+import { Messages, TranslateParams } from './types';
 import {
   DEFAULT_LOCALE,
   Locale,
@@ -28,9 +30,7 @@ import {
 } from './locale';
 
 /** Flat `dotted.key` -> template string. */
-export type Messages = Readonly<Record<string, string>>;
-
-export type TranslateParams = Readonly<Record<string, string | number>>;
+export type { Messages, TranslateParams } from './types';
 
 const TABLES: Record<Locale, Messages> = {
   en: EN_MESSAGES,
@@ -66,6 +66,12 @@ export class I18nService {
   readonly locale = this.current.asReadonly();
   readonly supported = SUPPORTED_LOCALES;
   readonly isChinese = computed(() => this.current() === 'zh-CN');
+
+  constructor() {
+    // Hand pure formatter helpers a live translator. Registering here means the
+    // first injection covers every subsequent call.
+    setRuntimeTranslator((key, params) => this.t(key, params));
+  }
 
   setLocale(locale: Locale): void {
     if (!TABLES[locale]) return;

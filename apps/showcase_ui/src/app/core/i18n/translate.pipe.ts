@@ -16,7 +16,8 @@
 
 import { Pipe, PipeTransform, inject } from '@angular/core';
 
-import { I18nService, TranslateParams } from './i18n.service';
+import { I18nService } from './i18n.service';
+import { TranslateParams } from './types';
 
 /**
  * Resolves a message key in the active locale: `{{ 'nav.home' | t }}`.
