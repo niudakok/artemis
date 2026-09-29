@@ -542,6 +542,72 @@
           <!-- CUSTOM CONFIGURATION & .ENV INSPECTOR (NO OCR HERE) -->
           <div class="custom-config-inspector">
 
+      <!-- Custom OpenAI-compatible model form -->
+      <div class="inspector-card custom-model-card">
+        <div class="inspector-card-header">
+          <div class="inspector-header-left">
+            <span class="material-symbols-outlined header-icon">bolt</span>
+            <div class="inspector-header-titles">
+              <span class="inspector-title">{{ 'ui.customModelHeading' | t }}</span>
+              <span class="inspector-subtitle">{{ 'ui.customModelHelp' | t }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="custom-model-form">
+          <div class="custom-model-field">
+            <label class="custom-model-label">{{ 'ui.customBaseUrl' | t }}</label>
+            <input class="custom-model-input" type="url" [ngModel]="customBaseUrlInput()"
+              (ngModelChange)="customBaseUrlInput.set($event)"
+              [attr.placeholder]="'https://relay.example/v1'" spellcheck="false" autocomplete="off" />
+          </div>
+          <div class="custom-model-field">
+            <label class="custom-model-label">{{ 'ui.customModelName' | t }}</label>
+            <input class="custom-model-input" type="text" [ngModel]="customModelInput()"
+              (ngModelChange)="customModelInput.set($event)" placeholder="llama3.2-vision"
+              spellcheck="false" autocomplete="off" />
+          </div>
+          <div class="custom-model-field">
+            <label class="custom-model-label">{{ 'ui.customApiKeyOptional' | t }}</label>
+            <div class="unified-key-row">
+              <div class="unified-key-wrapper">
+                <span class="material-symbols-outlined key-prefix-icon">key</span>
+                <input class="unified-key-input" [type]="showCustomApiKey() ? 'text' : 'password'"
+                  [ngModel]="customApiKeyInput()" (ngModelChange)="customApiKeyInput.set($event)"
+                  [attr.placeholder]="'ui.customApiKey' | t" spellcheck="false" autocomplete="off" />
+                <button type="button" class="btn-icon-action"
+                  [title]="showCustomApiKey() ? ('ui.maskKey' | t) : ('ui.showPlaintext' | t)"
+                  (click)="toggleCustomApiKeyVisibility()">
+                  <span class="material-symbols-outlined">
+                    {{ showCustomApiKey() ? 'visibility_off' : 'visibility' }}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="custom-model-actions">
+            <button type="button" class="btn-unified-save" [disabled]="isSavingCustomModel()"
+              (click)="saveCustomModel()">
+              @if (isSavingCustomModel()) {
+              <span class="material-symbols-outlined spin">sync</span>
+              <span>{{ 'ui.customModelSaving' | t }}</span>
+              } @else {
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>{{ 'ui.customModelSave' | t }}</span>
+              }
+            </button>
+          </div>
+
+          @if (customModelMessage()) {
+          <div class="form-feedback form-ok">{{ customModelMessage() }}</div>
+          }
+          @if (customModelError()) {
+          <div class="form-feedback form-err">{{ customModelError() }}</div>
+          }
+        </div>
+      </div>
+
       <!-- Section 1: Active Model Config (artemis.jsonc) -->
       <div class="inspector-card">
         <div class="inspector-card-header">

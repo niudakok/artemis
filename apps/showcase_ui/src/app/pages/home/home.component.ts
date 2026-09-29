@@ -165,6 +165,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   public ocrSaveError = signal<string | null>(null);
   public isOcrKeyEdited = signal<boolean>(false);
 
+  // Custom OpenAI-compatible model state (Base URL + model + key)
+  public customBaseUrlInput = signal<string>('');
+  public customModelInput = signal<string>('');
+  public customApiKeyInput = signal<string>('');
+  public showCustomApiKey = signal<boolean>(false);
+  public isSavingCustomModel = signal<boolean>(false);
+  public customModelMessage = signal<string | null>(null);
+  public customModelError = signal<string | null>(null);
+
   // Clipboard copy state tracker for interactive feedback
   public copiedId = signal<string | null>(null);
 
@@ -747,6 +756,44 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.geminiSaveMessage.set('✓ Gemini API key cleared.');
       setTimeout(() => this.geminiSaveMessage.set(null), 3000);
     }
+  }
+
+  /**
+   * Set a custom OpenAI-compatible endpoint as the default model from the Web UI.
+   */
+  public saveCustomModel(): void {
+    const baseUrl = this.customBaseUrlInput().trim();
+    const model = this.customModelInput().trim();
+    const apiKey = this.customApiKeyInput().trim();
+    if (!baseUrl || !model) {
+      this.customModelError.set(
+        t('ai.baseAndModelRequired') // "Base URL and model name are required."
+      );
+      return;
+    }
+    this.isSavingCustomModel.set(true);
+    this.customModelError.set(null);
+    this.customModelMessage.set(null);
+
+    this.systemService.setCustomModel(baseUrl, model, apiKey, true).subscribe({
+      next: (res) => {
+        this.isSavingCustomModel.set(false);
+        this.customModelMessage.set(
+          res?.message || `✓ Custom model "${model}" is now the default.`
+        );
+        setTimeout(() => this.customModelMessage.set(null), 5000);
+      },
+      error: (err) => {
+        this.isSavingCustomModel.set(false);
+        this.customModelError.set(
+          err?.error?.detail || err?.message || t('setup.gemini.saveFailed')
+        );
+      }
+    });
+  }
+
+  public toggleCustomApiKeyVisibility(): void {
+    this.showCustomApiKey.update((v) => !v);
   }
 
   public saveOcrKey(): void {

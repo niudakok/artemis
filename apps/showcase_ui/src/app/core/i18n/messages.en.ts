@@ -982,4 +982,15 @@ export const EN_MESSAGES: Messages = {
   'ui.probe.summary.ocrNotConfigured': 'Not configured (optional)',
   'ui.probe.summary.pythonReady': 'Python {version} ready',
   'ui.probe.summary.toolchainReady': 'Ready (FFmpeg + scrcpy)',
+
+  // -------------------- home console: custom model form --
+  'ai.baseAndModelRequired': 'Base URL and model name are required.',
+  'ui.customApiKey': 'API key',
+  'ui.customApiKeyOptional': 'API key (leave empty for local servers)',
+  'ui.customBaseUrl': 'Base URL (OpenAI-compatible)',
+  'ui.customModelHeading': 'Custom model (OpenAI-compatible)',
+  'ui.customModelHelp': 'Point ARTEMIS at any OpenAI-compatible endpoint (a relay, a self-hosted server, or local Ollama/vLLM). The Base URL, model name and key are saved to .env and config/artemis.jsonc, and become the default model.',
+  'ui.customModelName': 'Model name',
+  'ui.customModelSave': 'Set as default model',
+  'ui.customModelSaving': 'Saving...',
 };

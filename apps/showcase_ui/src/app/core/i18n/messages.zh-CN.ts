@@ -956,4 +956,15 @@ export const ZH_CN_MESSAGES: Messages = {
   'ui.probe.summary.ocrNotConfigured': '未配置（可选）',
   'ui.probe.summary.pythonReady': 'Python {version} 已就绪',
   'ui.probe.summary.toolchainReady': '就绪（FFmpeg + scrcpy）',
+
+  // -------------------- home console: custom model form --
+  'ai.baseAndModelRequired': '请填写 Base URL 与模型名称。',
+  'ui.customApiKey': 'API 密钥',
+  'ui.customApiKeyOptional': 'API 密钥（本地服务可留空）',
+  'ui.customBaseUrl': 'Base URL（OpenAI 兼容）',
+  'ui.customModelHeading': '自定义模型（OpenAI 兼容）',
+  'ui.customModelHelp': '让 ARTEMIS 使用任意的 OpenAI 兼容端点（中转站、自建服务或本地 Ollama/vLLM）。填写 Base URL、模型名称与密钥后，会写入 .env 与 config/artemis.jsonc，并成为默认模型。',
+  'ui.customModelName': '模型名称',
+  'ui.customModelSave': '设为默认模型',
+  'ui.customModelSaving': '保存中...',
 };

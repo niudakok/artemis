@@ -5166,3 +5166,66 @@ $text-light: #94a3b8;
     transform: translateY(0) scale(1);
   }
 }
+
+/* Custom OpenAI-compatible model form */
+.custom-model-card {
+  .custom-model-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+
+    .custom-model-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+
+      .custom-model-label {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: $text-main;
+      }
+
+      .custom-model-input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid $card-border;
+        border-radius: 6px;
+        font-family: $font-mono;
+        font-size: 12.5px;
+        color: $text-main;
+        background: #f8fafc;
+        outline: none;
+        box-sizing: border-box;
+
+        &:focus {
+          border-color: $primary;
+          background: #fff;
+        }
+      }
+    }
+
+    .custom-model-actions {
+      margin-top: 2px;
+    }
+
+    .form-feedback {
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+
+    .form-ok {
+      color: #047857;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+    }
+
+    .form-err {
+      color: #b91c1c;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+  }
+}

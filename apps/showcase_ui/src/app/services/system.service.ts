@@ -577,6 +577,36 @@ export class SystemService {
       })
     );
   }
+
+  /**
+   * Point ARTEMIS at a custom OpenAI-compatible endpoint (Base URL + model + key).
+   * Persists to .env and sets the openai default model, then applies the report.
+   */
+  public setCustomModel(
+    baseUrl: string,
+    model: string,
+    apiKey: string,
+    persistToEnv: boolean = true
+  ): Observable<any> {
+    return this.http.post<any>('/api/system/model/custom', {
+      base_url: baseUrl,
+      model,
+      api_key: apiKey,
+      persist_to_env: persistToEnv
+    }).pipe(
+      tap({
+        next: (res) => {
+          if (res?.report) {
+            this.applyReadinessReport(res.report);
+          }
+          this.fetchModelConfigEnv().subscribe();
+        },
+        error: (err) => {
+          console.error('Failed to set custom model:', err);
+        }
+      })
+    );
+  }
 }
 
 export interface ModelConfigEnvResponse {
