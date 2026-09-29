@@ -1,0 +1,113 @@
+# 定期将 google/artemis 的更新合并回本仓库的 main。
+#
+# 本仓库是 google/artemis 的镜像，并额外维护一个仅含本文件的提交，
+# 因此这里使用普通 merge 而非 --ff-only：main 含有上游没有的提交，
+# 快进合并永远不可能成功。
+#
+# 安全约束：
+#   - 永不使用 force push
+#   - 合并冲突时中止并开 issue，绝不把冲突状态推上去
+#   - 每次运行串行执行（concurrency），避免并发推送
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每 6 小时一次，避开整点以分散 GitHub Actions 的调度高峰
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge google/artemis into main
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream main
+        run: |
+          git fetch https://github.com/google/artemis.git \
+            main:refs/remotes/upstream/main
+
+      - name: Detect whether upstream advanced
+        id: detect
+        run: |
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse upstream/main)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "main already matches upstream/main."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "upstream/main is $(git rev-list --count HEAD..upstream/main) commit(s) ahead."
+            git log --oneline HEAD..upstream/main | head -20
+          fi
+
+      - name: Merge upstream into main
+        id: merge
+        if: steps.detect.outputs.changed == 'true'
+        continue-on-error: true
+        run: |
+          git merge --no-edit --no-ff upstream/main -m "chore(sync): 合并 google/artemis 上游更新 [skip ci]"
+
+      - name: Push merged main
+        if: steps.detect.outputs.changed == 'true' && steps.merge.outcome == 'success'
+        run: |
+          git push origin HEAD:main
+
+      - name: Report merge conflict
+        if: steps.merge.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '[upstream-sync]';
+            // 用标题标记去重，不依赖 label —— 标签不存在会让 issues.create 返回 422。
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+            });
+            if (existing.some(i => i.title.includes(marker))) {
+              core.info('已有未关闭的上游同步冲突 issue，跳过新建。');
+              return;
+            }
+            const conflicts = await github.exec.getExecOutput({
+              cmd: 'git diff --name-only --diff-filter=U',
+              cwd: process.env.GITHUB_WORKSPACE,
+            });
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${marker} 上游同步冲突，需要人工处理`,
+              body: [
+                '自动同步 google/artemis 时发生合并冲突，未做任何推送。',
+                '',
+                '冲突文件：',
+                '```',
+                conflicts.stdout.trim() || '(无法枚举)',
+                '```',
+                '',
+                '处理方式：',
+                '1. 本地 `git fetch upstream && git checkout main`',
+                '2. `git merge upstream/main` 手动解决冲突',
+                '3. 若汉化分支需要跟进：`git checkout i18n/zh-cn && git rebase main`',
+                '',
+                '关闭本 issue 后可重新手动触发本 workflow。',
+              ].join('\n'),
+            });
