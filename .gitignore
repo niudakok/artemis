@@ -108,6 +108,14 @@ live_screenshot*.png
 *.pem
 *.key
 
+# Locally-downloaded toolchains (project-local, never committed)
+tools/
+# Local ADB temp workspace (used to avoid sandbox Temp permission issues)
+.tmp-adb/
+
+# Runtime-generated IPC port lock file
+artemis/artemis-ipc-port
+
 # OS Artifacts
 .DS_Store
 .DS_Store?
