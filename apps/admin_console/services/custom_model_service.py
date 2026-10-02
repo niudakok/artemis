@@ -67,7 +67,9 @@ def set_all_models(config_path: Path, model: str) -> bool:
     Only real config key lines are touched (``"provider": ...`` / ``"model": ...
     ``); commented mentions in prose are unaffected. Returns True.
     """
-    config_path.write_text(_rewrite_models(config_path.read_text(encoding="utf-8"), model), encoding="utf-8")
+    config_path.write_text(
+        _rewrite_models(config_path.read_text(encoding="utf-8"), model), encoding="utf-8"
+    )
     return True
 
 
@@ -123,7 +125,9 @@ def update_default_model(config_path: Path, provider: str, model: str) -> bool:
         if not line.strip():
             rebuilt.append(line)
         elif _PROVIDER_LINE.match(line):
-            rebuilt.append(re.sub(r'^(\s*"provider"\s*:\s*")[^"]*(")', rf"\g<1>{provider}\g<2>", line))
+            rebuilt.append(
+                re.sub(r'^(\s*"provider"\s*:\s*")[^"]*(")', rf"\g<1>{provider}\g<2>", line)
+            )
         elif _MODEL_LINE.match(line):
             rebuilt.append(re.sub(r'^(\s*"model"\s*:\s*")[^"]*(")', rf"\g<1>{model}\g<2>", line))
         else:
@@ -151,11 +155,7 @@ def _upsert_env(env_path: Path, key: str, value: str) -> None:
         out.append(f"{key}={value}")
     # Drop any commented duplicates (e.g. "# KEY=..." or "# KEY=...") that would
     # shadow the live value when the file is sourced.
-    out = [
-        line
-        for line in out
-        if not re.match(rf"^\s*#\s*{re.escape(key)}\s*=", line)
-    ]
+    out = [line for line in out if not re.match(rf"^\s*#\s*{re.escape(key)}\s*=", line)]
     env_path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
 
