@@ -35,7 +35,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          # 保持默认 persist-credentials: true，把 GITHUB_TOKEN 写入 git 配置，
+          # 否则 git push 会报 "could not read Username for 'https://github.com'"。
+          persist-credentials: true
 
       - name: Configure git identity
         run: |
@@ -50,12 +52,16 @@ jobs:
       - name: Detect whether upstream advanced
         id: detect
         run: |
-          if [ "$(git rev-parse HEAD)" = "$(git rev-parse upstream/main)" ]; then
+          # 本仓库 main 永远包含上游没有的自有提交（本 workflow、汉化等），
+          # 因此不能比较 HEAD 与 upstream/main 是否相等 —— 它们永远不会相等。
+          # 正确判据：upstream/main 中是否存在 HEAD 尚未包含的提交。
+          ahead="$(git rev-list --count HEAD..upstream/main)"
+          if [ "$ahead" -eq 0 ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "main already matches upstream/main."
+            echo "upstream/main 没有新提交，无需同步。"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "upstream/main is $(git rev-list --count HEAD..upstream/main) commit(s) ahead."
+            echo "upstream/main is $ahead commit(s) ahead."
             git log --oneline HEAD..upstream/main | head -20
           fi
 
