@@ -34,8 +34,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
+          # 定时任务运行在默认分支（i18n/zh-cn）上，必须显式检出 main，
+          # 否则会把本地化分支的内容推到 main。
+          ref: main
           fetch-depth: 0
-          persist-credentials: false
+          # 保留默认凭据（GITHUB_TOKEN），否则 git push 没有认证信息。
+          persist-credentials: true
 
       - name: Configure git identity
         run: |
@@ -50,9 +54,11 @@ jobs:
       - name: Detect whether upstream advanced
         id: detect
         run: |
-          if [ "$(git rev-parse HEAD)" = "$(git rev-parse upstream/main)" ]; then
+          # main 含有上游没有的提交（如本文件），不能用 rev 相等判断；
+          # 正确条件是 upstream/main 是否已是 HEAD 的祖先。
+          if git merge-base --is-ancestor upstream/main HEAD; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "main already matches upstream/main."
+            echo "main already contains upstream/main, nothing to sync."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "upstream/main is $(git rev-list --count HEAD..upstream/main) commit(s) ahead."
@@ -67,9 +73,29 @@ jobs:
           git merge --no-edit --no-ff upstream/main -m "chore(sync): 合并 google/artemis 上游更新 [skip ci]"
 
       - name: Push merged main
+        id: push
         if: steps.detect.outputs.changed == 'true' && steps.merge.outcome == 'success'
+        continue-on-error: true
         run: |
           git push origin HEAD:main
+
+      - name: Report push failure
+        if: steps.push.outcome == 'failure'
+        run: |
+          {
+            echo "## ⚠️ 上游合并后推送失败 / Push after upstream merge failed"
+            echo
+            echo "合并已在 runner 内完成，但推送到 origin/main 被拒绝。最常见的原因："
+            echo "本次上游更新包含 \`.github/workflows/\` 下的文件变更，而内置 GITHUB_TOKEN 没有 \`workflows\` 权限。"
+            echo
+            echo "The merge completed on the runner, but pushing to origin/main was rejected. The most common cause:"
+            echo "this upstream update touches files under \`.github/workflows/\`, and the built-in GITHUB_TOKEN lacks the \`workflows\` permission."
+            echo
+            echo "处理方式 / How to fix:"
+            echo "1. 本地执行 \`git fetch upstream && git checkout main && git merge upstream/main && git push origin main\`"
+            echo "2. 或配置带 workflow 权限的 PAT 供本工作流使用"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
       - name: Report merge conflict
         if: steps.merge.outcome == 'failure'
