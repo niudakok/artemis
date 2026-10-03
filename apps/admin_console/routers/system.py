@@ -291,7 +291,9 @@ class CustomModelRequest(BaseModel):
         description="OpenAI-compatible Base URL (e.g. https://relay.example/v1 or http://127.0.0.1:11434/v1)"
     )
     model: str = Field(description="Model identifier to use as the default")
-    api_key: str = Field(default="", description="API key for the endpoint (empty for local Ollama)")
+    api_key: str = Field(
+        default="", description="API key for the endpoint (empty for local Ollama)"
+    )
     persist_to_env: bool = Field(default=True, description="Persist Base URL + key to .env")
 
 
